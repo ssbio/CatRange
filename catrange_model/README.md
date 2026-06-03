@@ -12,6 +12,17 @@ The curated enzyme-kinetics database supporting CatRange is now referred to as *
 
 ---
 
+## Quick Inference (Colab)
+
+For interactive inference from **raw enzyme sequence + Isomeric SMILES** — no local install required:
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1z8cPg2J-EF01rd0yl7fgGlvWDohOj5m0?usp=sharing)
+
+The CatRange inference notebook handles embedding generation, model loading, and prediction end-to-end. Simply connect to a Colab runtime and follow the instructions.
+
+
+---
+
 ## Table of Contents
 
 1. [Why Range/Class Prediction?](#why-rangeclass-prediction)
@@ -45,28 +56,6 @@ This preserves biochemical interpretability, improves robustness under distribut
 
 ---
 
-## Key Results
-
-5-fold cross-validation performance:
-
-| Parameter | Embedding | Accuracy | E-Accuracy (±1 bin) | MCC | Role |
-|-----------|-----------|----------|----------------------|-----|------|
-| **k<sub>cat</sub>** | **ESM-C** | **0.693 ± 0.006** | **0.828 ± 0.005** | **0.626 ± 0.009** | Primary |
-| **K<sub>M</sub>** | **ESM-C** | **0.601 ± 0.002** | **0.748 ± 0.003** | **0.521 ± 0.003** | Primary |
-| k<sub>cat</sub> | ESM-2 | 0.678 ± 0.008 | 0.815 ± 0.006 | 0.605 ± 0.011 | Alternative |
-| K<sub>M</sub> | ESM-2 | 0.588 ± 0.003 | 0.734 ± 0.004 | 0.501 ± 0.004 | Alternative |
-
----
-
-## Quick Inference (Colab)
-
-For interactive inference from **raw enzyme sequence + Isomeric SMILES** — no local install required:
-
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1z8cPg2J-EF01rd0yl7fgGlvWDohOj5m0?usp=sharing)
-
-The CatRange inference notebook handles embedding generation, model loading, and prediction end-to-end. Simply connect to a Colab runtime and follow the instructions.
-
----
 
 ## Installation
 
