@@ -1,10 +1,8 @@
-# CatRange (RealKcat): Robust Prediction of Enzyme Variant Kinetic Ranges
+## Quick Inference (Colab): [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1z8cPg2J-EF01rd0yl7fgGlvWDohOj5m0?usp=sharing)
+For interactive inference from **raw enzyme sequence + Isomeric SMILES** — no local install required: The CatRange inference notebook handles embedding generation, model loading, and prediction end-to-end. Simply connect to a Colab runtime and follow the instructions.
+---
 
-[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch 2.0+](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
-[![XGBoost 2.0+](https://img.shields.io/badge/XGBoost-2.0+-green.svg)](https://xgboost.readthedocs.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status: Reproducible](https://img.shields.io/badge/Status-Reproducible-brightgreen.svg)](#reproducibility)
+# CatRange (RealKcat): Robust Prediction of Enzyme Variant Kinetic Ranges
 
 **CatRange** is a machine-learning pipeline for predicting enzyme kinetic parameters — k<sub>cat</sub> (catalytic constant) and K<sub>M</sub> (Michaelis constant) — from curated enzyme–substrate data. It combines protein-language-model embeddings with XGBoost classification to predict **log-scale kinetic ranges** rather than brittle point estimates.
 
@@ -12,15 +10,13 @@ The curated enzyme-kinetics database supporting CatRange is now referred to as *
 
 ---
 
-## Quick Inference (Colab)
 
-For interactive inference from **raw enzyme sequence + Isomeric SMILES** — no local install required:
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch 2.0+](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
+[![XGBoost 2.0+](https://img.shields.io/badge/XGBoost-2.0+-green.svg)](https://xgboost.readthedocs.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Status: Reproducible](https://img.shields.io/badge/Status-Reproducible-brightgreen.svg)](#reproducibility)
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1z8cPg2J-EF01rd0yl7fgGlvWDohOj5m0?usp=sharing)
-
-The CatRange inference notebook handles embedding generation, model loading, and prediction end-to-end. Simply connect to a Colab runtime and follow the instructions.
-
----
 
 # CatRange
 
