@@ -1,0 +1,3 @@
+evaluation,metric,full_mean,full_std,no_synthetic_negative_mean,no_synthetic_negative_std,delta_full_minus_no_synthetic,note
+Positive-only SeqID<=100,Accuracy,0.6386812908266928,0.006063322611928778,0.5452929628331085,0.009227255221393386,0.09338832799358432,Same SeqID<=100 positive fold evaluation for both models; no synthetic negative test samples included.
+Positive-only SeqID<=100,e-Accuracy,0.8984528148053734,0.005148752263510385,0.8750004423211426,0.00958838276236871,0.02345237248423082,Same SeqID<=100 positive fold evaluation for both models; no synthetic negative test samples included.

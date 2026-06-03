@@ -1,0 +1,5 @@
+model_name,repo_url,env_hint,prediction_file,manifest_file,n_rows
+CatPred,https://github.com/maranasgroup/CatPred,catpred_bench,results/external_benchmarks/catpred/oof_predictions.csv,results/external_benchmarks/catpred/manifest.json,11743
+EITLEM-Kinetics,https://github.com/XvesS/EITLEM-Kinetics,eitlem_gpu_runtime,results/external_benchmarks/eitlem_kinetics/oof_predictions.csv,results/external_benchmarks/eitlem_kinetics/manifest.json,11743
+UniKP,https://github.com/HanselYu/UniKP,unikp_gpu_runtime,results/external_benchmarks/unikp/oof_predictions.csv,results/external_benchmarks/unikp/manifest.json,11743
+DLKcat,https://github.com/SysBioChalmers/DLKcat,,results/external_benchmarks/dlkcat/oof_predictions.csv,results/external_benchmarks/dlkcat/manifest.json,11743

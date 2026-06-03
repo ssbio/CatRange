@@ -1,0 +1,5 @@
+evaluation,metric,full_mean,full_std,no_synthetic_negative_mean,no_synthetic_negative_std,delta_full_minus_no_synthetic,note
+Native CV summary,Accuracy,0.6041200380076113,0.004143013800887,0.5317812254353795,0.0097395788505826,0.07233881257223174,Full CV includes relabelled synthetic negatives in train/val/test; no-synthetic CV has positive WT/MD/PafA only.
+Native CV summary,e-Accuracy,0.8724651367577954,0.0023807152353534,0.8771241254227778,0.0097879825251044,-0.0046589886649824885,Full CV includes relabelled synthetic negatives in train/val/test; no-synthetic CV has positive WT/MD/PafA only.
+Native CV summary,F1,0.602890489761982,0.0043194859122072,0.5298561240010373,0.0096497139727395,0.07303436576094469,Full CV includes relabelled synthetic negatives in train/val/test; no-synthetic CV has positive WT/MD/PafA only.
+Native CV summary,MCC,0.5147956809856957,0.0060944850784379,0.4150185336269579,0.0111279610414379,0.09977714735873783,Full CV includes relabelled synthetic negatives in train/val/test; no-synthetic CV has positive WT/MD/PafA only.

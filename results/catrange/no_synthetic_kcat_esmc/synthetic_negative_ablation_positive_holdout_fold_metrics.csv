@@ -1,0 +1,11 @@
+model,fold,n,accuracy,e_accuracy
+Full CatRange,1,100,0.63,0.88
+Full CatRange,2,100,0.62,0.84
+Full CatRange,3,100,0.64,0.84
+Full CatRange,4,100,0.59,0.84
+Full CatRange,5,100,0.62,0.89
+No synthetic negatives,1,100,0.59,0.87
+No synthetic negatives,2,100,0.6,0.83
+No synthetic negatives,3,100,0.6,0.83
+No synthetic negatives,4,100,0.61,0.84
+No synthetic negatives,5,100,0.55,0.84

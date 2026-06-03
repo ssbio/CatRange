@@ -1,0 +1,11 @@
+{
+  "model_name": "DLKcat",
+  "repo_url": "https://github.com/SysBioChalmers/DLKcat",
+  "env_hint": null,
+  "prediction_source": "CatLog cached-feature benchmark table",
+  "prediction_column": "dlkcat_pred",
+  "n_rows": 11743,
+  "n_folds": 5,
+  "training_status_in_this_repo": "not_retrained_here_external_baseline",
+  "note": "External benchmark predictions are staged here for reproducible evaluation. Full retraining uses the upstream repository and model-specific environment."
+}

@@ -1,0 +1,11 @@
+{
+  "model_name": "UniKP",
+  "repo_url": "https://github.com/HanselYu/UniKP",
+  "env_hint": "unikp_gpu_runtime",
+  "prediction_source": "CatLog cached-feature benchmark table",
+  "prediction_column": "unikp_pred",
+  "n_rows": 11743,
+  "n_folds": 5,
+  "training_status_in_this_repo": "not_retrained_here_external_baseline",
+  "note": "External benchmark predictions are staged here for reproducible evaluation. Full retraining uses the upstream repository and model-specific environment."
+}
