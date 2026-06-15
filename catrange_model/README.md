@@ -16,7 +16,7 @@ The curated enzyme-kinetics database supporting CatRange is now referred to as *
 
 For interactive inference from **raw enzyme sequence + Isomeric SMILES** — no local install required:
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1z8cPg2J-EF01rd0yl7fgGlvWDohOj5m0?usp=sharing)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb)
 
 The CatRange inference notebook handles embedding generation, model loading, and prediction end-to-end. Simply connect to a Colab runtime and follow the instructions.
 
