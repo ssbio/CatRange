@@ -1,0 +1,23 @@
+CatRange Colab runtime stability validation
+Date: 2026-08-28
+
+PASS: patch utility compiles under Python 3
+PASS: patch utility reproduced the notebook from the pristine branch version
+PASS: notebook JSON parses successfully
+PASS: all code-cell outputs and execution counts are cleared
+PASS: embedded standalone CLEAN runner compiles
+PASS: all 6 Python heredocs in the pipeline compile
+PASS: complete pipeline passes bash -n
+PASS: legacy --bootstrap-python path is absent from the patched notebook
+PASS: ensurepip and get-pip.py paths are absent from the patched notebook
+PASS: version-specific Ubuntu python3.10/3.12 venv installs are absent
+PASS: mechanistic requirements include transformers==4.46.3
+PASS: unused mechanistic imbalanced-learn==0.8.1 dependency is absent
+PASS: managed CLEAN Python 3.12, mechanistic Python 3.12, and binary Python 3.10 environments are present
+PASS: cached environments require a matching fingerprint and successful import smoke test
+PASS: CLEAN result merging occurs after both mechanistic and binary branches
+
+NOT RUN: Colab GPU/model-download integration
+NOT RUN: numerical prediction regression against an accepted reference CSV
+
+Run the Colab matrix in TESTING.md before merging to main.
