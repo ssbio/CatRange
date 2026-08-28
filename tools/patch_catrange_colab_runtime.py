@@ -15,8 +15,8 @@ import re
 from pathlib import Path
 
 
-RELEASE = "2026-08-28-python-runtime-stability-test-2"
-PREVIOUS_RELEASE = "2026-08-28-python-runtime-stability-test"
+RELEASE = "2026-08-28-python-runtime-stability-test-3"
+PREVIOUS_RELEASE = "2026-08-28-python-runtime-stability-test-2"
 UV_VERSION = "0.8.14"
 
 
@@ -686,6 +686,7 @@ def patch_notebook(source_path: Path, destination_path: Path) -> None:
         source = "".join(cell.get("source", []))
         source = source.replace("2026-03-17-optimized", RELEASE)
         source = source.replace(PREVIOUS_RELEASE, RELEASE)
+        source = source.replace("transformers==4.46.3", "transformers==4.48.1")
         if "#@title 2. Run CLEAN + CatRange Inference pipeline" in source:
             if "UV_UNMANAGED_INSTALL" in source:
                 source = upgrade_pipeline_uv_bootstrap(source)

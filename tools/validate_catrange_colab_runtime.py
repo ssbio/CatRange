@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 
-RELEASE = "2026-08-28-python-runtime-stability-test"
+RELEASE = "2026-08-28-python-runtime-stability-test-3"
 FORBIDDEN = (
     "--bootstrap-python",
     "get-pip.py",
@@ -20,15 +20,17 @@ FORBIDDEN = (
     "python3.12-venv",
     "python3.10-venv",
     "ensurepip",
+    "UV_UNMANAGED_INSTALL",
     "\n+    '",
 )
 REQUIRED = (
     '"--clean-python"',
     '"3.12"',
     'UV_VERSION = "0.8.14"',
+    "uv/releases/download/{UV_VERSION}",
     'MECH_ENV="${CATRANGE_RUNTIME_DIR}/mechanistic-py312"',
     'BINARY_ENV="${CATRANGE_RUNTIME_DIR}/binary-py310"',
-    'transformers==4.46.3',
+    'transformers==4.48.1',
     'CLEAN_STANDALONE_BOOTSTRAPPED=1 "${CLEAN_PYTHON}"',
 )
 
