@@ -16,8 +16,12 @@ PASS: unused mechanistic imbalanced-learn==0.8.1 dependency is absent
 PASS: managed CLEAN Python 3.12, mechanistic Python 3.12, and binary Python 3.10 environments are present
 PASS: cached environments require a matching fingerprint and successful import smoke test
 PASS: CLEAN result merging occurs after both mechanistic and binary branches
+PASS: fresh Colab CPU runtime downloaded and verified the pinned uv binary
+PASS: Colab CPU Demo completed CLEAN plus mechanistic ESM-C/CatRange inference
+PASS: the 2 eligible Demo rows received kinetics predictions and the final merge completed
 
-NOT RUN: Colab GPU/model-download integration
+NOT RUN: Colab GPU integration
+NOT RUN: Binary mode Colab integration
 NOT RUN: numerical prediction regression against an accepted reference CSV
 
 Run the Colab matrix in TESTING.md before merging to main.
