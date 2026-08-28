@@ -15,7 +15,8 @@ import re
 from pathlib import Path
 
 
-RELEASE = "2026-08-28-python-runtime-stability-test"
+RELEASE = "2026-08-28-python-runtime-stability-test-2"
+PREVIOUS_RELEASE = "2026-08-28-python-runtime-stability-test"
 UV_VERSION = "0.8.14"
 
 
@@ -59,14 +60,14 @@ def patch_embedded_clean_runner(script: str, clean_requirements: tuple[str, ...]
     script = replace_once(
         script,
         "import csv\nimport json\n",
-        "import csv\nimport hashlib\nimport json\n",
-        "CLEAN hashlib import insertion point",
+        "import csv\nimport hashlib\nimport json\nimport platform\n",
+        "CLEAN hashlib/platform import insertion point",
     )
     script = replace_once(
         script,
         "import tempfile\nimport zipfile\n",
-        "import tempfile\nimport time\nimport zipfile\n",
-        "CLEAN time import insertion point",
+        "import tarfile\nimport tempfile\nimport time\nimport zipfile\n",
+        "CLEAN tarfile/time import insertion point",
     )
 
     constants = (
@@ -117,25 +118,77 @@ def uv_environment(work_dir: Path) -> Dict[str, str]:
 def ensure_uv(work_dir: Path) -> Path:
     uv_bin = work_dir / "uv-bin" / "uv"
     if uv_bin.exists():
-        return uv_bin
+        result = subprocess.run(
+            [str(uv_bin), "--version"],
+            text=True,
+            capture_output=True,
+        )
+        if result.returncode == 0 and result.stdout.strip() == f"uv {UV_VERSION}":
+            return uv_bin
+        uv_bin.unlink()
 
     uv_bin.parent.mkdir(parents=True, exist_ok=True)
-    install_script = work_dir / f"install-uv-{UV_VERSION}.sh"
-    run(
-        [
-            "curl",
-            "-LsSf",
-            f"https://astral.sh/uv/{UV_VERSION}/install.sh",
-            "-o",
-            str(install_script),
-        ],
-        quiet=False,
+    machine = platform.machine().lower()
+    targets = {
+        "x86_64": "x86_64-unknown-linux-gnu",
+        "amd64": "x86_64-unknown-linux-gnu",
+        "aarch64": "aarch64-unknown-linux-gnu",
+        "arm64": "aarch64-unknown-linux-gnu",
+    }
+    target = targets.get(machine)
+    if target is None:
+        raise RuntimeError(f"Unsupported Linux architecture for uv: {machine}")
+
+    archive_path = work_dir / f"uv-{UV_VERSION}-{target}.tar.gz"
+    download_path = archive_path.with_suffix(archive_path.suffix + ".download")
+    staged_uv = uv_bin.with_suffix(".download")
+    release_url = (
+        f"https://github.com/astral-sh/uv/releases/download/{UV_VERSION}/"
+        f"uv-{target}.tar.gz"
     )
-    install_env = os.environ.copy()
-    install_env["UV_UNMANAGED_INSTALL"] = str(uv_bin.parent)
-    run(["sh", str(install_script)], env=install_env, quiet=False)
-    if not uv_bin.exists():
-        raise RuntimeError(f"uv installer completed but {uv_bin} was not created.")
+    try:
+        run(
+            [
+                "curl",
+                "-fL",
+                "--retry",
+                "3",
+                "--retry-all-errors",
+                release_url,
+                "-o",
+                str(download_path),
+            ],
+            quiet=False,
+        )
+        download_path.replace(archive_path)
+        with tarfile.open(archive_path, "r:gz") as archive:
+            members = [
+                member
+                for member in archive.getmembers()
+                if member.isfile() and Path(member.name).name == "uv"
+            ]
+            if len(members) != 1:
+                raise RuntimeError(
+                    f"Expected one uv binary in {archive_path}; found {len(members)}."
+                )
+            source = archive.extractfile(members[0])
+            if source is None:
+                raise RuntimeError(f"Could not read uv binary from {archive_path}.")
+            with source, staged_uv.open("wb") as destination:
+                shutil.copyfileobj(source, destination)
+        staged_uv.chmod(0o755)
+        staged_uv.replace(uv_bin)
+    finally:
+        archive_path.unlink(missing_ok=True)
+        download_path.unlink(missing_ok=True)
+        staged_uv.unlink(missing_ok=True)
+
+    result = run([str(uv_bin), "--version"], capture_output=True)
+    if result.stdout.strip() != f"uv {UV_VERSION}":
+        uv_bin.unlink(missing_ok=True)
+        raise RuntimeError(
+            f"Expected uv {UV_VERSION}, received {result.stdout.strip()!r}."
+        )
     return uv_bin
 
 
@@ -282,6 +335,119 @@ def acquire_environment_lock(lock_dir: Path, timeout_seconds: int = 900) -> None
 
     compile(script, "standalone_clean_inference.py", "exec")
     return script
+
+
+def upgrade_embedded_uv_bootstrap(script: str) -> str:
+    """Replace the installer-based uv bootstrap in an already-patched runner."""
+    if "import platform\n" not in script:
+        script = replace_once(
+            script,
+            "import os\n",
+            "import os\nimport platform\n",
+            "CLEAN platform import insertion point",
+        )
+    if "import tarfile\n" not in script:
+        script = replace_once(
+            script,
+            "import tempfile\n",
+            "import tarfile\nimport tempfile\n",
+            "CLEAN tarfile import insertion point",
+        )
+
+    ensure_uv = r'''def ensure_uv(work_dir: Path) -> Path:
+    uv_bin = work_dir / "uv-bin" / "uv"
+    if uv_bin.exists():
+        result = subprocess.run(
+            [str(uv_bin), "--version"],
+            text=True,
+            capture_output=True,
+        )
+        if result.returncode == 0 and result.stdout.strip() == f"uv {UV_VERSION}":
+            return uv_bin
+        uv_bin.unlink()
+
+    uv_bin.parent.mkdir(parents=True, exist_ok=True)
+    machine = platform.machine().lower()
+    targets = {
+        "x86_64": "x86_64-unknown-linux-gnu",
+        "amd64": "x86_64-unknown-linux-gnu",
+        "aarch64": "aarch64-unknown-linux-gnu",
+        "arm64": "aarch64-unknown-linux-gnu",
+    }
+    target = targets.get(machine)
+    if target is None:
+        raise RuntimeError(f"Unsupported Linux architecture for uv: {machine}")
+
+    archive_path = work_dir / f"uv-{UV_VERSION}-{target}.tar.gz"
+    download_path = archive_path.with_suffix(archive_path.suffix + ".download")
+    staged_uv = uv_bin.with_suffix(".download")
+    release_url = (
+        f"https://github.com/astral-sh/uv/releases/download/{UV_VERSION}/"
+        f"uv-{target}.tar.gz"
+    )
+    try:
+        run(
+            [
+                "curl",
+                "-fL",
+                "--retry",
+                "3",
+                "--retry-all-errors",
+                release_url,
+                "-o",
+                str(download_path),
+            ],
+            quiet=False,
+        )
+        download_path.replace(archive_path)
+        with tarfile.open(archive_path, "r:gz") as archive:
+            members = [
+                member
+                for member in archive.getmembers()
+                if member.isfile() and Path(member.name).name == "uv"
+            ]
+            if len(members) != 1:
+                raise RuntimeError(
+                    f"Expected one uv binary in {archive_path}; found {len(members)}."
+                )
+            source = archive.extractfile(members[0])
+            if source is None:
+                raise RuntimeError(f"Could not read uv binary from {archive_path}.")
+            with source, staged_uv.open("wb") as destination:
+                shutil.copyfileobj(source, destination)
+        staged_uv.chmod(0o755)
+        staged_uv.replace(uv_bin)
+    finally:
+        archive_path.unlink(missing_ok=True)
+        download_path.unlink(missing_ok=True)
+        staged_uv.unlink(missing_ok=True)
+
+    result = run([str(uv_bin), "--version"], capture_output=True)
+    if result.stdout.strip() != f"uv {UV_VERSION}":
+        uv_bin.unlink(missing_ok=True)
+        raise RuntimeError(
+            f"Expected uv {UV_VERSION}, received {result.stdout.strip()!r}."
+        )
+    return uv_bin
+'''
+    script = replace_regex_once(
+        script,
+        r"def ensure_uv\(work_dir: Path\) -> Path:\n.*?(?=\n\ndef environment_fingerprint)",
+        ensure_uv,
+        "installer-based CLEAN uv bootstrap",
+    )
+    compile(script, "standalone_clean_inference.py", "exec")
+    return script
+
+
+def upgrade_pipeline_uv_bootstrap(text: str) -> str:
+    prefix = "standalone_clean_script.write_text("
+    start = text.index(prefix) + len(prefix)
+    end_marker = ")\nstandalone_clean_script.chmod(0o755)"
+    end = text.index(end_marker, start)
+    embedded_script = ast.literal_eval(text[start:end])
+    embedded_script = upgrade_embedded_uv_bootstrap(embedded_script)
+    return text[:start] + repr(embedded_script) + text[end:]
 
 
 def patch_pipeline_cell(
@@ -519,13 +685,17 @@ def patch_notebook(source_path: Path, destination_path: Path) -> None:
     for cell in notebook.get("cells", []):
         source = "".join(cell.get("source", []))
         source = source.replace("2026-03-17-optimized", RELEASE)
+        source = source.replace(PREVIOUS_RELEASE, RELEASE)
         if "#@title 2. Run CLEAN + CatRange Inference pipeline" in source:
-            source = patch_pipeline_cell(
-                source,
-                clean_requirements,
-                mechanistic_requirements,
-                binary_requirements,
-            )
+            if "UV_UNMANAGED_INSTALL" in source:
+                source = upgrade_pipeline_uv_bootstrap(source)
+            elif f"uv/releases/download/{{UV_VERSION}}" not in source:
+                source = patch_pipeline_cell(
+                    source,
+                    clean_requirements,
+                    mechanistic_requirements,
+                    binary_requirements,
+                )
             patched_pipeline = True
         cell["source"] = source.splitlines(keepends=True)
         if cell.get("cell_type") == "code":
