@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 
-RELEASE = "2026-08-28-python-runtime-stability-test-3"
+RELEASE = "2026-08-28-python-runtime-stability-test-4"
 FORBIDDEN = (
     "--bootstrap-python",
     "get-pip.py",
@@ -21,6 +21,8 @@ FORBIDDEN = (
     "python3.10-venv",
     "ensurepip",
     "UV_UNMANAGED_INSTALL",
+    'subprocess.run(["bash", "-lc", apt_cmd], check=True)',
+    "cat /tmp/catrange_",
     "\n+    '",
 )
 REQUIRED = (
@@ -32,7 +34,25 @@ REQUIRED = (
     'BINARY_ENV="${CATRANGE_RUNTIME_DIR}/binary-py310"',
     'transformers==4.48.1',
     'CLEAN_STANDALONE_BOOTSTRAPPED=1 "${CLEAN_PYTHON}"',
+    "CATRANGE_FRIENDLY_OUTPUT_V1",
+    "run_setup_step",
+    "[1/3] Preparing the runtime",
+    "[2/3] CLEAN",
+    "[3/3] CatRange",
+    "[done] Results saved: inference_results.csv",
 )
+
+
+def extract_pipeline_bash(pipeline_cell: str) -> str:
+    wrapper_prefix = "pipeline_script = r'''"
+    if wrapper_prefix in pipeline_cell:
+        start = pipeline_cell.index(wrapper_prefix) + len(wrapper_prefix)
+        end = pipeline_cell.index("'''\n\nprocess = subprocess.Popen", start)
+        return pipeline_cell[start:end]
+    magic = "\n%%bash\n"
+    if magic in pipeline_cell:
+        return pipeline_cell.split(magic, 1)[1]
+    raise RuntimeError("Could not locate the Bash pipeline in the notebook cell.")
 
 
 def extract_embedded_runner(pipeline: str) -> str:
@@ -74,7 +94,11 @@ def validate(notebook_path: Path, bash_path: Path | None) -> list[str]:
     ]
     if len(pipeline_cells) != 1:
         raise RuntimeError(f"Expected one pipeline cell; found {len(pipeline_cells)}.")
-    pipeline = pipeline_cells[0]
+    pipeline_cell = pipeline_cells[0]
+    if "CATRANGE_STREAMED_PIPELINE_V1" not in pipeline_cell:
+        raise RuntimeError("The pipeline does not use the concise streamed runner.")
+    compile(pipeline_cell, "pipeline-cell.py", "exec")
+    pipeline = extract_pipeline_bash(pipeline_cell)
 
     for fragment in FORBIDDEN:
         if fragment in pipeline:
@@ -86,6 +110,14 @@ def validate(notebook_path: Path, bash_path: Path | None) -> list[str]:
     notebook_text = notebook_path.read_text(encoding="utf-8")
     if RELEASE not in notebook_text:
         raise RuntimeError("Notebook release marker was not updated.")
+    for marker in (
+        "CATRANGE_FRIENDLY_SETUP_OUTPUT_V1",
+        "CATRANGE_FRIENDLY_REVIEW_OUTPUT_V1",
+    ):
+        if marker not in notebook_text:
+            raise RuntimeError(f"Missing concise notebook output marker: {marker}")
+    if 'ip.run_line_magic("env"' in notebook_text:
+        raise RuntimeError("Noisy IPython environment magic remains in the notebook.")
     for index, cell in enumerate(cells):
         if cell.get("cell_type") == "code":
             if cell.get("execution_count") is not None:
@@ -103,7 +135,7 @@ def validate(notebook_path: Path, bash_path: Path | None) -> list[str]:
         compile(block, f"pipeline-heredoc-{index}.py", "exec")
 
     binary_marker = pipeline.index("# ---------------------------- BINARY BRANCH")
-    merge_marker = pipeline.index("[CLEAN] Merging EC annotations back into inference_results.csv")
+    merge_marker = pipeline.index('CLEAN_STANDALONE_BOOTSTRAPPED=1 "${CLEAN_PYTHON}"')
     final_summary_marker = pipeline.index('results_path = Path("inference_results.csv")', merge_marker)
     if not (binary_marker < merge_marker < final_summary_marker):
         raise RuntimeError("CLEAN merge is not positioned after both inference branches.")

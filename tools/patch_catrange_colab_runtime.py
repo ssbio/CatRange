@@ -15,8 +15,8 @@ import re
 from pathlib import Path
 
 
-RELEASE = "2026-08-28-python-runtime-stability-test-3"
-PREVIOUS_RELEASE = "2026-08-28-python-runtime-stability-test-2"
+RELEASE = "2026-08-28-python-runtime-stability-test-4"
+PREVIOUS_RELEASE = "2026-08-28-python-runtime-stability-test-3"
 UV_VERSION = "0.8.14"
 
 
@@ -672,6 +672,514 @@ fi
     return text
 
 
+def patch_embedded_clean_output(script: str) -> str:
+    """Keep routine setup noise out of the user-facing Colab output."""
+    if "CATRANGE_FRIENDLY_CLEAN_OUTPUT_V1" in script:
+        return script
+
+    script = replace_once(
+        script,
+        'BOOTSTRAP_ENV_VAR = "CLEAN_STANDALONE_BOOTSTRAPPED"\n',
+        'BOOTSTRAP_ENV_VAR = "CLEAN_STANDALONE_BOOTSTRAPPED"\n'
+        '# CATRANGE_FRIENDLY_CLEAN_OUTPUT_V1\n',
+        "friendly CLEAN output marker",
+    )
+    script = replace_once(
+        script,
+        '''            ],
+            quiet=False,
+        )
+        download_path.replace(archive_path)
+''',
+        '''            ],
+        )
+        download_path.replace(archive_path)
+''',
+        "quiet uv download",
+    )
+    script = replace_once(
+        script,
+        'run([str(uv_bin), "python", "install", args.clean_python], env=uv_env, quiet=False)',
+        'run([str(uv_bin), "python", "install", args.clean_python], env=uv_env)',
+        "quiet CLEAN Python install",
+    )
+    quiet_uv_block = '''                env=uv_env,
+                quiet=False,
+            )
+'''
+    if script.count(quiet_uv_block) != 2:
+        raise RuntimeError(
+            "Expected two verbose CLEAN uv setup calls; "
+            f"found {script.count(quiet_uv_block)}."
+        )
+    script = script.replace(
+        quiet_uv_block,
+        '''                env=uv_env,
+            )
+''',
+        2,
+    )
+
+    replacements = (
+        (
+            'log("[setup] Reusing the validated CLEAN environment")',
+            'log("[1/3] Runtime ready (cached).")',
+        ),
+        (
+            'log("[setup] Removing an incomplete or stale CLEAN environment")',
+            'log("[1/3] Refreshing an incomplete runtime...")',
+        ),
+        (
+            'log(f"[setup] Creating CLEAN with managed Python {args.clean_python}")',
+            'log("[1/3] Installing runtime dependencies (first run only)...")',
+        ),
+        (
+            'log("[setup] Downloading CLEAN source files")',
+            'log("      Downloading required CLEAN files...")',
+        ),
+        (
+            'log("[setup] Downloading CLEAN model files")',
+            'log("      Downloading the CLEAN model...")',
+        ),
+        (
+            '''    log(f"[run] Running CLEAN enzyme screening on {runtime_label.upper()}")
+    log(f"[run] Screening {sequence_count} sequence(s) with CLEAN")
+''',
+            '''    log(
+        f"[2/3] CLEAN: screening {sequence_count} sequence(s) "
+        f"on {runtime_label.upper()}..."
+    )
+''',
+        ),
+        (
+            '''        "[result] "
+        f"CLEAN classified {enzyme_count} / {len(df)} sequence(s) as enzyme-like."
+''',
+            '''        "[2/3] CLEAN complete: "
+        f"{enzyme_count} of {len(df)} sequence(s) passed the enzyme screen."
+''',
+        ),
+        (
+            'log("[result] Combined CLEAN screening and catrange predictions into the final results table.")',
+            'log("[done] CLEAN and CatRange results combined.")',
+        ),
+    )
+    for old, new in replacements:
+        if old not in script:
+            raise RuntimeError(f"Expected CLEAN output text was not found: {old[:60]!r}")
+        script = script.replace(old, new)
+
+    compile(script, "standalone_clean_inference.py", "exec")
+    return script
+
+
+def patch_setup_cell_output(source: str) -> str:
+    if "CATRANGE_FRIENDLY_SETUP_OUTPUT_V1" in source:
+        return source
+
+    source = replace_once(
+        source,
+        'NOTEBOOK_RELEASE = "' + RELEASE + '"\n',
+        'NOTEBOOK_RELEASE = "' + RELEASE + '"\n'
+        '# CATRANGE_FRIENDLY_SETUP_OUTPUT_V1\n',
+        "friendly setup output marker",
+    )
+    old_summary = '''print(f"Prepared {len(df)} row(s) for mode={mode}.")
+print("CLEAN will predict a top EC number and confidence score before any catrange kinetics predictions are made.")
+print(f"CLEAN will use esm_batches_per_clean_inference={BATCH_SIZE} in this notebook.")
+print(f"Accepted sequence length range: 9 to {MAX_SEQ_LENGTH} amino acids.")
+print(f"Accepted SMILES length range: 2 to {MAX_SMILES_LENGTH} characters.")
+if mode != "Bulk-large":
+    print(f"Batch size is saved as {BATCH_SIZE} and only used by Bulk-large mode.")
+if rows_over_limits:
+    print(
+        f"Warning: {rows_over_limits} row(s) exceed the sequence or SMILES limits and will be marked as skipped."
+    )
+print("Saved infer_input.csv and run_config.json for this run.")
+'''
+    new_summary = '''print(f"Ready: {len(df)} input row(s) | {mode} | {mutation_mode}")
+if rows_over_limits:
+    print(
+        f"Note: {rows_over_limits} row(s) are outside the supported length limits "
+        "and will be kept in the results as skipped."
+    )
+'''
+    source = replace_once(source, old_summary, new_summary, "concise input summary")
+    source = replace_once(
+        source,
+        '''from IPython import get_ipython
+
+ip = get_ipython()
+env_values = {
+''',
+        '''env_values = {
+''',
+        "silent environment export header",
+    )
+    source = replace_once(
+        source,
+        '''for key, value in env_values.items():
+    ip.run_line_magic("env", f"{key}={value}")
+''',
+        '''os.environ.update(env_values)
+''',
+        "silent environment export",
+    )
+    return source
+
+
+def patch_review_cell_output(source: str) -> str:
+    if "CATRANGE_FRIENDLY_REVIEW_OUTPUT_V1" in source:
+        return source
+
+    marker = 'df = pd.read_csv(results_path)\n'
+    start = source.index(marker) + len(marker)
+    concise_review = '''# CATRANGE_FRIENDLY_REVIEW_OUTPUT_V1
+enzyme_count = int(df.get("Classified as enzyme?", pd.Series(dtype=str)).eq("Yes").sum())
+prediction_count = int(
+    df.get("Pipeline note", pd.Series(dtype=str)).eq("catrange prediction completed").sum()
+)
+skipped_count = len(df) - prediction_count
+
+summary = pd.DataFrame(
+    [
+        {
+            "Input rows": len(df),
+            "Passed CLEAN": enzyme_count,
+            "CatRange predictions": prediction_count,
+            "Skipped": skipped_count,
+        }
+    ]
+)
+print("Run complete")
+display(summary)
+
+preview_columns = [
+    column
+    for column in [
+        "Input row",
+        "Classified as enzyme?",
+        "Predicted EC number",
+        "Pipeline note",
+        "Predicted kcat range (s^-1)",
+        "Predicted KM range (M)",
+    ]
+    if column in df.columns
+]
+
+if preview_columns:
+    display(df.loc[:, preview_columns].head(min(10, len(df))))
+else:
+    display(df.head(min(10, len(df))))
+
+print("Saved: inference_results.csv")
+'''
+    return source[:start] + concise_review
+
+
+def patch_pipeline_output(text: str) -> str:
+    if "CATRANGE_FRIENDLY_OUTPUT_V1" in text:
+        return text.replace(
+            '    print("Inference complete. Saved inference_results.csv")\n',
+            '    print("[3/3] CatRange complete.")\n',
+        )
+
+    prefix = "standalone_clean_script.write_text("
+    start = text.index(prefix) + len(prefix)
+    end_marker = ")\nstandalone_clean_script.chmod(0o755)"
+    end = text.index(end_marker, start)
+    embedded_script = ast.literal_eval(text[start:end])
+    embedded_script = patch_embedded_clean_output(embedded_script)
+    text = text[:start] + repr(embedded_script) + text[end:]
+
+    text = replace_once(
+        text,
+        "%%bash\nset -euo pipefail\n",
+        "%%bash\nset -euo pipefail\n# CATRANGE_FRIENDLY_OUTPUT_V1\n",
+        "friendly pipeline output marker",
+    )
+    text = replace_regex_once(
+        text,
+        r'echo "\[info\] MODE=.*?"\n',
+        'echo "CatRange run: ${MODE} | ${MUTATION_MODE:-Mechanistic}"\n',
+        "concise run header",
+    )
+
+    helper_anchor = '''fi
+
+echo "CatRange run: ${MODE} | ${MUTATION_MODE:-Mechanistic}"
+'''
+    setup_helper = '''fi
+
+run_setup_step() {
+  local label="$1"
+  local log_path="$2"
+  shift 2
+  if ! "$@" >"${log_path}" 2>&1; then
+    echo "[error] ${label} failed. Last details:"
+    tail -n 25 "${log_path}" || true
+    exit 1
+  fi
+}
+
+echo "CatRange run: ${MODE} | ${MUTATION_MODE:-Mechanistic}"
+'''
+    text = replace_once(text, helper_anchor, setup_helper, "quiet setup helper")
+
+    old_apt = '''print("[CLEAN] Preparing the CLEAN runtime...")
+subprocess.run(["bash", "-lc", apt_cmd], check=True)
+'''
+    new_apt = '''print("[1/3] Preparing the runtime...", flush=True)
+apt_result = subprocess.run(
+    ["bash", "-lc", apt_cmd],
+    text=True,
+    capture_output=True,
+)
+if apt_result.returncode != 0:
+    details = "\\n".join(
+        part for part in (apt_result.stdout, apt_result.stderr) if part
+    ).strip()
+    print("[error] Runtime preparation failed.", flush=True)
+    if details:
+        print("\\n".join(details.splitlines()[-25:]), flush=True)
+    raise RuntimeError("Could not install the required system tools.")
+'''
+    text = replace_once(text, old_apt, new_apt, "quiet prerequisite setup")
+
+    text = replace_once(
+        text,
+        'print("[CLEAN] Running enzyme screening before catrange...")\n',
+        "",
+        "duplicate CLEAN progress line",
+    )
+    text = replace_once(
+        text,
+        'print(f"[CLEAN] {enzyme_count} / {len(screened_df)} row(s) were classified as enzyme-like.")\n',
+        "",
+        "duplicate CLEAN result line",
+    )
+    text = replace_once(
+        text,
+        'print("[result] No rows passed CLEAN screening. Creating the final results table with skip labels.")',
+        'print("[done] No rows passed the CLEAN screen; results were saved with skip reasons.")',
+        "no eligible rows message",
+    )
+
+    text = replace_once(
+        text,
+        '  echo "[catrange] Running Mechanistic Mutation-Aware mode (recommended, ESM-C)..."\n',
+        '  echo "[3/3] CatRange: mechanistic kinetics prediction (ESM-C)..."\n',
+        "mechanistic progress heading",
+    )
+    text = replace_regex_once(
+        text,
+        r'  echo "\[setup\] Preparing managed Python 3\.12 for mechanistic inference.*?"\n',
+        "",
+        "mechanistic setup noise",
+    )
+    old_mech_setup = '''  if [ "${MECH_VALID}" = "1" ]; then
+    echo "[setup] Reusing the validated mechanistic environment"
+  else
+    rm -rf "${MECH_ENV}"
+    "${UV_BIN}" python install 3.12
+    "${UV_BIN}" venv --managed-python --python 3.12 "${MECH_ENV}"
+    "${UV_BIN}" pip install --python "${MECH_PY}" -r "${MECH_REQUIREMENTS}"
+    "${MECH_PY}" -c 'import sys,torch,numpy,pandas,sklearn,joblib,xgboost,tqdm,esm,httpx,biotite,transformers,huggingface_hub; assert sys.version_info[:2] == (3, 12)'
+    printf '%s\\n' "${MECH_FINGERPRINT}" > "${MECH_MARKER}"
+  fi
+'''
+    new_mech_setup = '''  if [ "${MECH_VALID}" = "1" ]; then
+    echo "      CatRange runtime ready (cached)."
+  else
+    echo "      Installing CatRange dependencies (first run only)..."
+    rm -rf "${MECH_ENV}"
+    run_setup_step "Python 3.12 setup" /tmp/catrange_mech_setup.log "${UV_BIN}" python install 3.12
+    run_setup_step "CatRange environment setup" /tmp/catrange_mech_setup.log "${UV_BIN}" venv --managed-python --python 3.12 "${MECH_ENV}"
+    run_setup_step "CatRange dependency setup" /tmp/catrange_mech_setup.log "${UV_BIN}" pip install --python "${MECH_PY}" -r "${MECH_REQUIREMENTS}"
+    run_setup_step "CatRange environment check" /tmp/catrange_mech_setup.log "${MECH_PY}" -c 'import sys,torch,numpy,pandas,sklearn,joblib,xgboost,tqdm,esm,httpx,biotite,transformers,huggingface_hub; assert sys.version_info[:2] == (3, 12)'
+    printf '%s\\n' "${MECH_FINGERPRINT}" > "${MECH_MARKER}"
+  fi
+'''
+    text = replace_once(text, old_mech_setup, new_mech_setup, "quiet mechanistic setup")
+    text = replace_regex_once(
+        text,
+        r'  echo "\[run\] Starting mechanistic inference.*?"\n',
+        "",
+        "mechanistic command details",
+    )
+    text = replace_once(
+        text,
+        '''print(f"[run] catrange will run on {str(device).upper()}"); sys.stdout.flush()
+print("Preparing catrange models and embeddings..."); sys.stdout.flush()
+''',
+        '''print(f"      Computing predictions on {str(device).upper()}..."); sys.stdout.flush()
+''',
+        "mechanistic device output",
+    )
+    mechanistic_completion = (
+        'print("Inference complete. Saved inference_results.csv"); sys.stdout.flush()\n'
+    )
+    if text.count(mechanistic_completion) != 2:
+        raise RuntimeError(
+            "Expected two branch completion outputs; "
+            f"found {text.count(mechanistic_completion)}."
+        )
+    text = text.replace(
+        mechanistic_completion,
+        'print("[3/3] CatRange complete."); sys.stdout.flush()\n',
+        2,
+    )
+    text = replace_once(
+        text,
+        '''    df.to_csv("inference_results.csv",index=False)
+    print("Inference complete. Saved inference_results.csv")
+''',
+        '''    df.to_csv("inference_results.csv",index=False)
+    print("[3/3] CatRange complete.")
+''',
+        "mechanistic no-valid-row completion output",
+    )
+    text = replace_once(
+        text,
+        '''  then
+    cat /tmp/catrange_mechanistic_stderr.log
+    exit 1
+  fi
+''',
+        '''  then
+    echo "[error] CatRange inference failed. Last details:"
+    tail -n 25 /tmp/catrange_mechanistic_stderr.log || true
+    exit 1
+  fi
+''',
+        "concise mechanistic failure output",
+    )
+
+    text = replace_regex_once(
+        text,
+        r'  echo "\[catrange\] Running Binary Alanine Simplified mode.*?"\n',
+        '  echo "[3/3] CatRange: binary kinetics prediction (ESM-2)..."\n',
+        "binary progress heading",
+    )
+    text = replace_regex_once(
+        text,
+        r'  echo "\[setup\] Preparing managed Python 3\.10 for binary inference.*?"\n',
+        "",
+        "binary setup noise",
+    )
+    old_binary_setup = '''  if [ "${BINARY_VALID}" = "1" ]; then
+    echo "[setup] Reusing the validated binary environment"
+  else
+    rm -rf "${BINARY_ENV}"
+    "${UV_BIN}" python install 3.10
+    "${UV_BIN}" venv --managed-python --python 3.10 "${BINARY_ENV}"
+    "${UV_BIN}" pip install --python "${BINARY_PY}" -r "${BINARY_REQUIREMENTS}"
+    "${BINARY_PY}" -c 'import sys,torch,numpy,pandas,sklearn,imblearn,joblib,xgboost,transformers,esm,tqdm; assert sys.version_info[:2] == (3, 10)'
+    printf '%s\\n' "${BINARY_FINGERPRINT}" > "${BINARY_MARKER}"
+  fi
+'''
+    new_binary_setup = '''  if [ "${BINARY_VALID}" = "1" ]; then
+    echo "      CatRange runtime ready (cached)."
+  else
+    echo "      Installing CatRange dependencies (first run only)..."
+    rm -rf "${BINARY_ENV}"
+    run_setup_step "Python 3.10 setup" /tmp/catrange_binary_setup.log "${UV_BIN}" python install 3.10
+    run_setup_step "CatRange environment setup" /tmp/catrange_binary_setup.log "${UV_BIN}" venv --managed-python --python 3.10 "${BINARY_ENV}"
+    run_setup_step "CatRange dependency setup" /tmp/catrange_binary_setup.log "${UV_BIN}" pip install --python "${BINARY_PY}" -r "${BINARY_REQUIREMENTS}"
+    run_setup_step "CatRange environment check" /tmp/catrange_binary_setup.log "${BINARY_PY}" -c 'import sys,torch,numpy,pandas,sklearn,imblearn,joblib,xgboost,transformers,esm,tqdm; assert sys.version_info[:2] == (3, 10)'
+    printf '%s\\n' "${BINARY_FINGERPRINT}" > "${BINARY_MARKER}"
+  fi
+'''
+    text = replace_once(text, old_binary_setup, new_binary_setup, "quiet binary setup")
+    text = replace_once(
+        text,
+        'print("Using device:",device); sys.stdout.flush()\nprint("Preparing catrange models and embeddings..."); sys.stdout.flush()\n',
+        'print(f"      Computing predictions on {str(device).upper()}..."); sys.stdout.flush()\n',
+        "binary device output",
+    )
+    text = replace_once(
+        text,
+        'df.to_csv("inference_results.csv",index=False); print("Inference complete. Saved inference_results.csv")',
+        'df.to_csv("inference_results.csv",index=False); print("[3/3] CatRange complete.")',
+        "binary no-valid-row completion output",
+    )
+    text = replace_once(
+        text,
+        '''    then
+      cat /tmp/catrange_binary_stderr.log
+      exit 1
+    fi
+''',
+        '''    then
+      echo "[error] CatRange inference failed. Last details:"
+      tail -n 25 /tmp/catrange_binary_stderr.log || true
+      exit 1
+    fi
+''',
+        "concise binary failure output",
+    )
+
+    text = replace_once(
+        text,
+        '  echo "[CLEAN] Merging EC annotations back into inference_results.csv..."\n',
+        "",
+        "merge setup noise",
+    )
+    saved_results_output = '''print("[result] Saved user-facing inference_results.csv")
+print("[result] Saved inference_results_detailed.csv with the original technical columns")
+'''
+    if text.count(saved_results_output) != 2:
+        raise RuntimeError(
+            "Expected two saved-results output blocks; "
+            f"found {text.count(saved_results_output)}."
+        )
+    text = text.replace(
+        saved_results_output,
+        'print("[done] Results saved: inference_results.csv")\n',
+        2,
+    )
+    return text
+
+
+def wrap_pipeline_cell(text: str) -> str:
+    """Run Bash through Python so errors stay concise instead of echoing the cell."""
+    if "CATRANGE_STREAMED_PIPELINE_V1" in text:
+        return text
+
+    magic = "\n%%bash\n"
+    if text.count(magic) != 1:
+        raise RuntimeError(f"Expected one Bash cell magic; found {text.count(magic)}.")
+    header, bash_script = text.split(magic, 1)
+    if "'''" in bash_script:
+        raise RuntimeError("Cannot safely wrap pipeline Bash containing triple single quotes.")
+
+    return f'''{header}
+
+# CATRANGE_STREAMED_PIPELINE_V1
+import subprocess
+
+pipeline_script = r''' + "'''" + bash_script + "'''" + r'''
+
+process = subprocess.Popen(
+    ["bash", "-lc", pipeline_script],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True,
+    bufsize=1,
+)
+if process.stdout is None:
+    raise RuntimeError("Could not read CatRange workflow output.")
+for output_line in process.stdout:
+    print(output_line, end="", flush=True)
+
+return_code = process.wait()
+if return_code != 0:
+    raise RuntimeError(
+        "CatRange workflow stopped. See the concise [error] details above."
+    )
+'''
+
+
 def patch_notebook(source_path: Path, destination_path: Path) -> None:
     root = Path(__file__).resolve().parents[1]
     clean_requirements = requirements_block(root / "envs" / "colab-clean-py312.txt")
@@ -687,6 +1195,8 @@ def patch_notebook(source_path: Path, destination_path: Path) -> None:
         source = source.replace("2026-03-17-optimized", RELEASE)
         source = source.replace(PREVIOUS_RELEASE, RELEASE)
         source = source.replace("transformers==4.46.3", "transformers==4.48.1")
+        if "#@title 1. Prepare input and save the run settings" in source:
+            source = patch_setup_cell_output(source)
         if "#@title 2. Run CLEAN + CatRange Inference pipeline" in source:
             if "UV_UNMANAGED_INSTALL" in source:
                 source = upgrade_pipeline_uv_bootstrap(source)
@@ -697,7 +1207,11 @@ def patch_notebook(source_path: Path, destination_path: Path) -> None:
                     mechanistic_requirements,
                     binary_requirements,
                 )
+            source = patch_pipeline_output(source)
+            source = wrap_pipeline_cell(source)
             patched_pipeline = True
+        if "#@title 3. Review the EC and kinetics results" in source:
+            source = patch_review_cell_output(source)
         cell["source"] = source.splitlines(keepends=True)
         if cell.get("cell_type") == "code":
             cell["execution_count"] = None
