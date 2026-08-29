@@ -141,7 +141,8 @@ WSL and Python 3.12.
 That single command runs **input validation → CLEAN → CatRange → merged results**.
 There is no separate cleaning command to remember. The CLEAN environment, source, and
 pretrained files are downloaded automatically on the first run and cached in
-`.clean_runtime/`.
+`.clean_runtime/`. CatRange model weights are downloaded from
+[Hugging Face](https://huggingface.co/ssbio/CatRange), not from this Git repository.
 
 For all command options:
 

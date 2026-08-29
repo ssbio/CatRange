@@ -1,7 +1,7 @@
 {
   "model_family": "CatRange",
   "scope": "CatRange manuscript kinetic-regime classifier only",
-  "archive": "inference/models/model_weights.zip (Git LFS)",
+  "archive": "https://huggingface.co/ssbio/CatRange/resolve/main/model_weights.zip",
   "expected_files": [
     "inference/models/kcat_esmc_FINAL.pkl",
     "inference/models/km_esmc_FINAL.pkl",
@@ -11,8 +11,8 @@
     "inference/models/km_esmc_FINAL_stats.pt"
   ],
   "notes": [
-    "The notebook and source inference script download and extract the archive automatically when needed.",
-    "git lfs pull is an optional way to fetch the repository copy before running inference."
+    "The model weights are hosted on Hugging Face, not in the Git repository.",
+    "The notebook and source inference script download and extract the archive automatically when needed."
   ],
   "downloads": {
     "model_weights.zip": "https://huggingface.co/ssbio/CatRange/resolve/main/model_weights.zip"

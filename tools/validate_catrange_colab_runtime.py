@@ -23,6 +23,7 @@ FORBIDDEN = (
     "UV_UNMANAGED_INSTALL",
     'subprocess.run(["bash", "-lc", apt_cmd], check=True)',
     "cat /tmp/catrange_",
+    "github.com/ssbio/CatRange/raw/main/inference/models/model_weights.zip",
     "\n+    '",
 )
 REQUIRED = (
@@ -37,6 +38,7 @@ REQUIRED = (
     "CATRANGE_FRIENDLY_OUTPUT_V1",
     "CATRANGE_LOCAL_JUPYTER_SUPPORT_V1",
     "CATRANGE_CLEAN_LINUX_MESSAGE_V1",
+    "https://huggingface.co/ssbio/CatRange/resolve/main/model_weights.zip",
     "run_setup_step",
     "[1/3] Preparing the runtime",
     "[2/3] CLEAN",

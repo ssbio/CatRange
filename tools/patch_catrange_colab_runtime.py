@@ -966,6 +966,17 @@ if missing_tools:
     )
 
 
+def remove_legacy_model_download_comments(source: str) -> str:
+    """Keep Hugging Face as the notebook's only documented weight source."""
+    legacy_lines = (
+        '    # os.system("wget -q https://github.com/TKAI-LAB-Mali/RealKcat/raw/main/model_weights.zip https://github.com/ssbio/CatRange/raw/main/inference/models/model_weights.zipinference/models/model_weights.zip -O model_weights.zip")\n',
+        '    # os.system("wget -q https://github.com/TKAI-LAB-Mali/RealKcat/raw/main/model_weights.zip -O model_weights.zip")\n',
+    )
+    for line in legacy_lines:
+        source = source.replace(line, "")
+    return source
+
+
 def patch_pipeline_output(text: str) -> str:
     if "CATRANGE_FRIENDLY_OUTPUT_V1" in text:
         return text.replace(
@@ -1312,6 +1323,7 @@ def patch_notebook(source_path: Path, destination_path: Path) -> None:
             source = patch_pipeline_output(source)
             source = patch_embedded_clean_platform_message(source)
             source = patch_local_jupyter_support(source)
+            source = remove_legacy_model_download_comments(source)
             source = sync_embedded_clean_runner(source, clean_runner)
             source = wrap_pipeline_cell(source)
             patched_pipeline = True

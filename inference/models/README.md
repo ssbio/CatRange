@@ -4,13 +4,6 @@ The trained CatRange XGBoost models are too large for normal GitHub storage.
 The notebook and `inference/catrange_inference.py` download the released model
 archive from Hugging Face and extract it automatically when needed.
 
-If you prefer Git LFS, you can download the repository copy manually:
-
-```bash
-git lfs install
-git lfs pull
-```
-
 Expected files:
 
 ```text
