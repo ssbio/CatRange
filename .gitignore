@@ -18,6 +18,22 @@ catrange_model/data_robust_v1/
 catrange_model/data_robust_v1
 reproducibility_runs/
 
+# Local notebook/source-inference caches and generated results.
+.clean_runtime/
+.catrange_runtime/
+esmc_model/
+model_weights/
+inference/models/model_weights/
+infer_input.csv
+run_config.json
+clean_screened.csv
+clean_catrange_ready.csv
+final_inference_results.csv
+inference_results*.csv
+standalone_clean_inference.py
+clean_runtime.env
+latex_queue.txt
+
 # External benchmark caches/checkpoints are generated, very large, and
 # reproducible from the scripts plus manifests.
 benchmarks/retrained_comparators/**/catpred_esm2_cache/

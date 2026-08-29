@@ -1,5 +1,3 @@
-# End-to-end source inference environment (Python 3.12, Linux/WSL)
-# CLEAN installs its conflicting fair-esm stack in a separate managed environment.
 numpy==2.1.3
 pandas==2.2.2
 scikit-learn==1.7.1

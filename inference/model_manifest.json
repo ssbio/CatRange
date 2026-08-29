@@ -1,15 +1,20 @@
 {
   "model_family": "CatRange",
   "scope": "CatRange manuscript kinetic-regime classifier only",
+  "archive": "inference/models/model_weights.zip (Git LFS)",
   "expected_files": [
     "inference/models/kcat_esmc_FINAL.pkl",
     "inference/models/km_esmc_FINAL.pkl",
+    "inference/models/model_weights/kcat_model_v1b.pkl",
+    "inference/models/model_weights/km_model_v1b.pkl",
     "inference/models/kcat_esmc_FINAL_stats.pt",
     "inference/models/km_esmc_FINAL_stats.pt"
   ],
   "notes": [
-    "The XGBoost model binaries are intentionally excluded from git because they exceed ordinary GitHub file-size limits.",
-    "Upload the binaries to the publication model host and update this manifest with the final download URLs."
+    "The notebook and source inference script download and extract the archive automatically when needed.",
+    "git lfs pull is an optional way to fetch the repository copy before running inference."
   ],
-  "downloads": {}
+  "downloads": {
+    "model_weights.zip": "https://huggingface.co/ssbio/CatRange/resolve/main/model_weights.zip"
+  }
 }

@@ -161,7 +161,17 @@ Hard-negative mining with boost factor 100× and 20% fine-tune fraction is appli
 
 ## Local Inference
 
-Local `catrange-predict` operates on **precomputed concatenated embeddings** (enzyme + substrate, `.pt` tensor files). It does **not** generate embeddings from raw sequence/SMILES — use the [Colab notebook](#quick-inference-colab) for that.
+For end-to-end inference from raw protein sequence and substrate SMILES, use
+the repository-level pipeline. It automatically runs CLEAN before CatRange:
+
+```bash
+python ../inference/catrange_inference.py \
+  --input ../inference/examples/demo_pairs.csv \
+  --output inference_results.csv
+```
+
+The package-level `catrange-predict` command remains available for advanced
+workflows that already have **precomputed concatenated embeddings**:
 
 ```bash
 catrange-predict \
@@ -276,7 +286,10 @@ Use the same config YAML, the same data directory, and the same environment. The
 Yes — edit the relevant YAML config. The shipped values are Optuna-tuned and recommended as-is.
 
 **Q: Does `catrange-predict` accept raw sequences?**
-No. It expects precomputed concatenated embeddings (`.pt`). Use the [Colab notebook](#quick-inference-colab) for end-to-end inference from raw enzyme sequence + Isomeric SMILES.
+No. It expects precomputed concatenated embeddings (`.pt`). Use the
+[Colab notebook](#quick-inference-colab) or
+`inference/catrange_inference.py` for end-to-end inference from raw enzyme
+sequence + Isomeric SMILES. Both paths run CLEAN automatically.
 
 ---
 ## 📚 Citation
