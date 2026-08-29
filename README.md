@@ -9,17 +9,23 @@ You provide a protein sequence and a substrate SMILES string. The pipeline first
 [CLEAN](https://github.com/tttianhao/CLEAN) to check whether the sequence is enzyme-like,
 then runs CatRange only for rows that pass that screen.
 
+<h2 align="center">Run CatRange in Google Colab</h2>
+
 <p align="center">
   <a href="https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb">
-    <img src="https://img.shields.io/badge/Run_in_Google_Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white" alt="Run CatRange in Google Colab">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open CatRange in Google Colab" height="42">
   </a>
 </p>
 
-<p align="center"><strong>Recommended for most users — no installation or coding required.</strong></p>
+<p align="center"><strong>RECOMMENDED FOR MOST USERS</strong><br><strong>No installation or coding required</strong></p>
 
-## Start Here: Google Colab
+> **Model weights:** CatRange downloads its model weights automatically from
+> [Hugging Face](https://huggingface.co/ssbio/CatRange). The model weights are
+> not stored in this Git repository.
 
-1. Click **Run in Google Colab** above.
+## Google Colab: Quick Start
+
+1. Click the **Open in Colab** badge above.
 2. Sign in to Google if asked.
 3. In Colab, choose **Runtime → Run all**.
 4. Keep **Demo** selected for your first run.
@@ -141,7 +147,8 @@ WSL and Python 3.12.
 That single command runs **input validation → CLEAN → CatRange → merged results**.
 There is no separate cleaning command to remember. The CLEAN environment, source, and
 pretrained files are downloaded automatically on the first run and cached in
-`.clean_runtime/`.
+`.clean_runtime/`. CatRange model weights are downloaded from
+[Hugging Face](https://huggingface.co/ssbio/CatRange), not from this Git repository.
 
 For all command options:
 

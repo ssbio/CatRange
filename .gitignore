@@ -24,6 +24,7 @@ reproducibility_runs/
 esmc_model/
 model_weights/
 inference/models/model_weights/
+inference/models/model_weights.zip
 infer_input.csv
 run_config.json
 clean_screened.csv
