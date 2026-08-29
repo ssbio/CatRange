@@ -877,6 +877,95 @@ print("Saved: inference_results.csv")
     return source[:start] + concise_review
 
 
+def patch_embedded_clean_platform_message(source: str) -> str:
+    """Give non-Linux local users an actionable CLEAN setup message."""
+    if "CATRANGE_CLEAN_LINUX_MESSAGE_V1" in source:
+        return source
+
+    prefix = "standalone_clean_script.write_text("
+    start = source.index(prefix) + len(prefix)
+    end_marker = ")\nstandalone_clean_script.chmod(0o755)"
+    end = source.index(end_marker, start)
+    embedded_script = ast.literal_eval(source[start:end])
+    embedded_script = replace_once(
+        embedded_script,
+        '''def ensure_uv(work_dir: Path) -> Path:
+    uv_bin = work_dir / "uv-bin" / "uv"
+''',
+        '''def ensure_uv(work_dir: Path) -> Path:
+    # CATRANGE_CLEAN_LINUX_MESSAGE_V1
+    if platform.system().lower() != "linux":
+        raise RuntimeError(
+            "Automatic CLEAN setup currently requires Linux. "
+            "On Windows, run CatRange inside WSL."
+        )
+
+    uv_bin = work_dir / "uv-bin" / "uv"
+''',
+        "CLEAN non-Linux guidance",
+    )
+    compile(embedded_script, "standalone_clean_inference.py", "exec")
+    return source[:start] + repr(embedded_script) + source[end:]
+
+
+def patch_local_jupyter_support(source: str) -> str:
+    """Avoid privileged package installation when the notebook runs locally."""
+    if "CATRANGE_LOCAL_JUPYTER_SUPPORT_V1" in source:
+        return source
+
+    source = replace_once(
+        source,
+        "import shlex\nimport subprocess\n",
+        "import shlex\nimport shutil\nimport subprocess\n",
+        "local Jupyter shutil import",
+    )
+    old_setup = '''print("[1/3] Preparing the runtime...", flush=True)
+apt_result = subprocess.run(
+    ["bash", "-lc", apt_cmd],
+    text=True,
+    capture_output=True,
+)
+if apt_result.returncode != 0:
+    details = "\\n".join(
+        part for part in (apt_result.stdout, apt_result.stderr) if part
+    ).strip()
+    print("[error] Runtime preparation failed.", flush=True)
+    if details:
+        print("\\n".join(details.splitlines()[-25:]), flush=True)
+    raise RuntimeError("Could not install the required system tools.")
+'''
+    new_setup = '''# CATRANGE_LOCAL_JUPYTER_SUPPORT_V1
+print("[1/3] Preparing the runtime...", flush=True)
+required_tools = ("git", "curl", "unzip")
+missing_tools = [tool for tool in required_tools if shutil.which(tool) is None]
+if missing_tools:
+    apt_result = subprocess.run(
+        ["bash", "-lc", apt_cmd],
+        text=True,
+        capture_output=True,
+    )
+    if apt_result.returncode != 0:
+        details = "\\n".join(
+            part for part in (apt_result.stdout, apt_result.stderr) if part
+        ).strip()
+        print(
+            "[error] Missing local tools: " + ", ".join(missing_tools),
+            flush=True,
+        )
+        if details:
+            print("\\n".join(details.splitlines()[-25:]), flush=True)
+        raise RuntimeError(
+            "Install Git, curl, and unzip, then rerun this cell."
+        )
+'''
+    return replace_once(
+        source,
+        old_setup,
+        new_setup,
+        "local Jupyter prerequisite setup",
+    )
+
+
 def patch_pipeline_output(text: str) -> str:
     if "CATRANGE_FRIENDLY_OUTPUT_V1" in text:
         return text.replace(
@@ -1180,8 +1269,21 @@ if return_code != 0:
 '''
 
 
+def sync_embedded_clean_runner(source: str, clean_runner: str) -> str:
+    """Use inference/clean_inference.py as the notebook runner source of truth."""
+    compile(clean_runner, "standalone_clean_inference.py", "exec")
+    prefix = "standalone_clean_script.write_text("
+    start = source.index(prefix) + len(prefix)
+    end_marker = ")\nstandalone_clean_script.chmod(0o755)"
+    end = source.index(end_marker, start)
+    return source[:start] + repr(clean_runner) + source[end:]
+
+
 def patch_notebook(source_path: Path, destination_path: Path) -> None:
     root = Path(__file__).resolve().parents[1]
+    clean_runner = (root / "inference" / "clean_inference.py").read_text(
+        encoding="utf-8"
+    )
     clean_requirements = requirements_block(root / "envs" / "colab-clean-py312.txt")
     mechanistic_requirements = requirements_block(
         root / "envs" / "colab-catrange-mechanistic-py312.txt"
@@ -1208,6 +1310,9 @@ def patch_notebook(source_path: Path, destination_path: Path) -> None:
                     binary_requirements,
                 )
             source = patch_pipeline_output(source)
+            source = patch_embedded_clean_platform_message(source)
+            source = patch_local_jupyter_support(source)
+            source = sync_embedded_clean_runner(source, clean_runner)
             source = wrap_pipeline_cell(source)
             patched_pipeline = True
         if "#@title 3. Review the EC and kinetics results" in source:

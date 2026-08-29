@@ -1,7 +1,15 @@
 # CatRange Model Files
 
-Place the trained CatRange XGBoost model binaries here before running full
-inference from the notebook.
+The trained CatRange XGBoost models are too large for normal GitHub storage.
+The notebook and `inference/catrange_inference.py` download the released model
+archive from Hugging Face and extract it automatically when needed.
+
+If you prefer Git LFS, you can download the repository copy manually:
+
+```bash
+git lfs install
+git lfs pull
+```
 
 Expected files:
 
@@ -17,5 +25,5 @@ kcat_esmc_FINAL_stats.pt
 km_esmc_FINAL_stats.pt
 ```
 
-The `.pkl` model binaries are not committed because each is hundreds of MB,
-larger than GitHub's normal file-size limit.
+The source script also recognizes the `kcat_model_v1b.pkl` and
+`km_model_v1b.pkl` names inside the released archive.

@@ -35,6 +35,8 @@ REQUIRED = (
     'transformers==4.48.1',
     'CLEAN_STANDALONE_BOOTSTRAPPED=1 "${CLEAN_PYTHON}"',
     "CATRANGE_FRIENDLY_OUTPUT_V1",
+    "CATRANGE_LOCAL_JUPYTER_SUPPORT_V1",
+    "CATRANGE_CLEAN_LINUX_MESSAGE_V1",
     "run_setup_step",
     "[1/3] Preparing the runtime",
     "[2/3] CLEAN",
@@ -127,6 +129,14 @@ def validate(notebook_path: Path, bash_path: Path | None) -> list[str]:
 
     embedded_runner = extract_embedded_runner(pipeline)
     compile(embedded_runner, "standalone_clean_inference.py", "exec")
+    source_runner_path = notebook_path.resolve().parent / "inference" / "clean_inference.py"
+    if source_runner_path.exists():
+        source_runner = source_runner_path.read_text(encoding="utf-8")
+        if source_runner != embedded_runner:
+            raise RuntimeError(
+                "inference/clean_inference.py does not match the notebook's "
+                "embedded CLEAN runner."
+            )
 
     heredocs = extract_python_heredocs(pipeline)
     if len(heredocs) < 5:
@@ -144,6 +154,7 @@ def validate(notebook_path: Path, bash_path: Path | None) -> list[str]:
         "notebook JSON parsed",
         "all notebook outputs and execution counts cleared",
         "embedded CLEAN runner compiled",
+        "source and notebook CLEAN runners match",
         f"{len(heredocs)} Python heredocs compiled",
         "legacy Colab Python bootstrap fragments absent",
         "managed Python 3.12/3.10 environments present",
