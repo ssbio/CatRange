@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CatRange — Job status</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1><a href="index.html" class="home-link">CatRange</a></h1>
+      <p class="tagline">Job status</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h2>Job <span id="job-id-display">…</span></h2>
+      <p id="status-line">Loading…</p>
+      <div id="progress-detail"></div>
+      <p id="results-link" hidden>
+        <a id="download-link" href="#">Download inference_results.csv</a>
+      </p>
+      <p class="hint">
+        Bookmark this page — it stays valid as long as the job exists. Refresh anytime;
+        this page also polls automatically while a job is queued or running.
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p><a href="index.html">&larr; Back to CatRange</a></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

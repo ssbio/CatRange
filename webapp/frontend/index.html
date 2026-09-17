@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CatRange — Enzyme kcat/KM range prediction</title>
+  <meta name="description" content="CatRange predicts enzyme kinetic parameter ranges (kcat and KM) from a protein sequence and substrate SMILES." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>CatRange</h1>
+      <p class="tagline">Predicting enzyme k<sub>cat</sub> / K<sub>M</sub> ranges from sequence + substrate</p>
+      <p class="lab-credit">A tool from the SSB Lab &middot; <a href="https://doi.org/10.1093/pnasnexus/pgag309" target="_blank" rel="noopener">Published in PNAS Nexus</a></p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card recommended">
+      <h2>Recommended: run it yourself in Google Colab</h2>
+      <p>
+        Free, no queue, and runs on Google's infrastructure. Most users should start
+        here.
+      </p>
+      <p class="colab-cta">
+        <a class="colab-badge" href="https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb" target="_blank" rel="noopener">
+          <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open CatRange in Google Colab" height="36" />
+        </a>
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Alternative: submit a job to the lab's queue</h2>
+      <p>
+        No Google account needed. The lab's own server runs the same CLEAN + CatRange
+        pipeline as the Colab notebook and hands you back a shareable results link.
+        This depends on the lab's compute being available — if it's at capacity we'll
+        tell you immediately and point you back to Colab instead of leaving you
+        waiting.
+      </p>
+
+      <form id="job-form" class="job-form">
+        <div class="field">
+          <label for="mode">Input type</label>
+          <select id="mode" name="mode">
+            <option value="demo">Demo (built-in examples)</option>
+            <option value="interactive">Interactive (paste pairs below)</option>
+            <option value="csv">Bulk CSV upload</option>
+          </select>
+        </div>
+
+        <div id="interactive-block" class="field" hidden>
+          <label for="pairs">Sequence,SMILES pairs (one per line)</label>
+          <textarea id="pairs" name="pairs" rows="6" placeholder="MKT...,CCO"></textarea>
+          <p class="hint">Up to 10 pairs. Each line: <code>sequence,Isomeric SMILES</code></p>
+        </div>
+
+        <div id="csv-block" class="field" hidden>
+          <label for="csv-file">CSV file</label>
+          <input type="file" id="csv-file" name="csv-file" accept=".csv" />
+          <p class="hint">
+            Needs <code>sequence</code> and <code>Isomeric SMILES</code> columns. See the
+            <a href="https://github.com/ssbio/CatRange/blob/main/inference/examples/demo_pairs.csv" target="_blank" rel="noopener">example CSV</a>.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="email">Email (optional — get notified when results are ready)</label>
+          <input type="email" id="email" name="email" placeholder="you@example.edu" />
+        </div>
+
+        <button type="submit" id="submit-btn">Submit job</button>
+      </form>
+
+      <p id="form-status" class="form-status" role="status"></p>
+    </section>
+
+    <section class="card">
+      <h2>Evolution of this work</h2>
+      <p>
+        CatRange's range-prediction approach builds on an earlier binary-classification
+        model, <strong>RealKcat</strong>, maintained at
+        <a href="https://github.com/TKAI-LAB-Mali/CatRange" target="_blank" rel="noopener">TKAI-LAB-Mali/CatRange</a>.
+      </p>
+      <p class="citation">
+        Anna Sajeevan K, Osinuga A, B A, Ferdous S, Shahreen N, Noor MS, Koneru S,
+        Santos-Correa LM, Salehi R, Chowdhury NB, Calderon-Lopez B, Mali A, Saha R,
+        Chowdhury R. Robust Prediction of Enzyme Variant Kinetics with RealKcat.
+        <em>bioRxiv</em> [Preprint]. 2025 Feb 15.
+        doi: <a href="https://doi.org/10.1101/2025.02.10.637555" target="_blank" rel="noopener">10.1101/2025.02.10.637555</a>.
+        PMID: 39990461 &middot; PMCID: PMC11844551.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Citation</h2>
+      <p class="citation">
+        CatRange. <em>PNAS Nexus</em>.
+        doi: <a href="https://doi.org/10.1093/pnasnexus/pgag309" target="_blank" rel="noopener">10.1093/pnasnexus/pgag309</a>.
+      </p>
+      <p>
+        Source code, model details, and full documentation:
+        <a href="https://github.com/ssbio/CatRange" target="_blank" rel="noopener">github.com/ssbio/CatRange</a>.
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>SSB Lab &middot; <a href="https://github.com/ssbio/CatRange">CatRange on GitHub</a></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -41,6 +41,24 @@ because it downloads the models; later runs in the same runtime reuse those file
 | [Google Colab](#method-1-google-colab-recommended) | First-time users, classes, and quick tests | None |
 | [Local Jupyter notebook](#method-2-local-jupyter-notebook) | Working on your own Linux/WSL computer | Basic |
 | [Source-code command](#method-3-source-code-command) | Automation, scripts, and advanced use | Advanced |
+| [Hosted service](#hosted-service) | Users without a Google account, or who want the lab to run the job | None |
+
+## Hosted Service
+
+The SSB lab also runs CatRange as a small web service at
+**[catrange.sahassbio.com](https://catrange.sahassbio.com)**. Submit sequence/SMILES
+pairs or a CSV through the form, and the lab's own infrastructure runs the same
+CLEAN + CatRange pipeline used by the Colab notebook. Each submission gets a job ID and
+a shareable status page where you can check progress and download
+`inference_results.csv` when it finishes; you can optionally provide an email address to
+be notified when results are ready.
+
+Running the pipeline this way depends on the lab's own compute being available.
+**Google Colab remains the recommended default** for most users — it is free, requires
+no queue, and runs on Google's infrastructure rather than the lab's. The hosted service
+is provided as a convenience for users who prefer not to use Colab directly, or who do
+not have a Google account. See [`webapp/README.md`](webapp/README.md) for how the
+service is deployed and operated.
 
 ## What You Need
 
@@ -193,6 +211,7 @@ ablation/                           Feature-ablation scripts and results
 figures/                            Figure source and output files
 manuscript/                         Manuscript and supporting information
 envs/                               Reproducible environment definitions
+webapp/                             catrange.sahassbio.com hosted-service stack
 ```
 
 ### Train CatRange
@@ -215,6 +234,23 @@ See [`envs/README.md`](envs/README.md) and
 [`catrange_model/README.md`](catrange_model/README.md) for training, benchmarking, and
 reproducibility details.
 
+## Evolution of This Work
+
+CatRange's range-prediction approach builds on an earlier binary-classification model
+for enzyme kinetics developed by the same collaborating labs. That predecessor
+codebase, **RealKcat**, is maintained separately at
+[TKAI-LAB-Mali/CatRange](https://github.com/TKAI-LAB-Mali/CatRange):
+
+> Anna Sajeevan K, Osinuga A, B A, Ferdous S, Shahreen N, Noor MS, Koneru S,
+> Santos-Correa LM, Salehi R, Chowdhury NB, Calderon-Lopez B, Mali A, Saha R,
+> Chowdhury R. **Robust Prediction of Enzyme Variant Kinetics with RealKcat.**
+> *bioRxiv* [Preprint]. 2025 Feb 15. doi:
+> [10.1101/2025.02.10.637555](https://doi.org/10.1101/2025.02.10.637555).
+> PMID: 39990461 · PMCID: PMC11844551.
+
 ## Citation
 
-Please cite the CatRange manuscript when using this code or data.
+Please cite the CatRange manuscript when using this code or data:
+
+> **CatRange: predicting enzyme kinetic parameter ranges.**
+> *PNAS Nexus*. doi: [10.1093/pnasnexus/pgag309](https://doi.org/10.1093/pnasnexus/pgag309).

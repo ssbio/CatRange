@@ -1,0 +1,117 @@
+name: catrange
+
+x-worker-env: &worker-env
+  CATRANGE_SETTINGS_PATH: /config/settings.yaml
+  CATRANGE_DATA_DIR: /data
+  REDIS_URL: redis://redis:6379/0
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./frontend:/usr/share/nginx/html:ro
+      - certbot_www:/var/www/certbot:ro
+      - certbot_conf:/etc/letsencrypt:ro
+    depends_on:
+      - api
+    networks: [catrange]
+
+  # Run `docker compose run --rm certbot certonly ...` once to obtain a
+  # certificate (see webapp/README.md), then this container just renews it.
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+    entrypoint: >
+      sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'
+    networks: [catrange]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks: [catrange]
+
+  api:
+    build:
+      context: ..
+      dockerfile: webapp/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *worker-env
+    volumes:
+      - catrange_data:/data
+      - ./config:/config:ro
+    depends_on:
+      - redis
+    networks: [catrange]
+
+  # One worker process per local GPU/concurrency slot. Scale with
+  # `docker compose up -d --scale worker=<N>` and keep
+  # config/settings.yaml local.max_concurrent_jobs in sync with <N>.
+  worker:
+    build:
+      context: ..
+      dockerfile: webapp/worker/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *worker-env
+    volumes:
+      - catrange_data:/data
+      - ./config:/config:ro
+      # Cache CLEAN's bootstrapped environment and downloaded model
+      # weights across restarts instead of re-downloading every time.
+      - clean_runtime:/app/.clean_runtime
+      - catrange_models:/app/inference/models
+    depends_on:
+      - redis
+    networks: [catrange]
+    # Uncomment on a host with the NVIDIA Container Toolkit installed, and
+    # set config/settings.yaml local.device to "cuda". Left commented out
+    # by default so `docker compose up` also works for CPU-only smoke tests
+    # (see webapp/README.md > "Local testing without a GPU server").
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # Polls/submits HCC ssbio-partition jobs. Inert no-op until
+  # config/settings.yaml hcc.enabled is set to true with real credentials.
+  hcc-poller:
+    build:
+      context: ..
+      dockerfile: webapp/worker/Dockerfile
+    restart: unless-stopped
+    command: ["python", "-m", "hcc_poller"]
+    environment:
+      <<: *worker-env
+    volumes:
+      - catrange_data:/data
+      - ./config:/config:ro
+      - ./secrets/hcc:/secrets/hcc:ro
+    depends_on:
+      - redis
+    networks: [catrange]
+
+networks:
+  catrange: {}
+
+volumes:
+  redis_data: {}
+  catrange_data: {}
+  catrange_models: {}
+  clean_runtime: {}
+  certbot_www: {}
+  certbot_conf: {}

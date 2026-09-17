@@ -1,0 +1,64 @@
+# CatRange hosted-service configuration.
+#
+# Copy this file to `settings.yaml` (same directory) and fill in real values
+# before deploying. `settings.yaml` is gitignored — never commit real
+# credentials or hostnames here.
+
+# --- Local (lab) execution -------------------------------------------------
+local:
+  # How many CatRange jobs may run at the same time on the lab's own
+  # server/VM. Set this to the number of GPUs (or 1 for a CPU-only box).
+  # This value must match the `worker` service's `--concurrency` /
+  # replica count in docker-compose.yml.
+  max_concurrent_jobs: 1
+
+  # How many jobs are allowed to sit in the local queue (queued + running)
+  # before new submissions are redirected to HCC (if configured) or, failing
+  # that, told to use Colab directly instead of waiting indefinitely.
+  max_queue_depth: 5
+
+  device: "auto" # "auto" | "cuda" | "cpu"
+
+# --- HCC UNL ssbio partition fallback --------------------------------------
+# NOT YET CONFIGURED. Leave `enabled: false` until the lab has:
+#   1. A dedicated (non-personal) HCC account/service key for CatRange jobs.
+#   2. An SSH keypair authorized for that account on the HCC login node.
+#   3. Confirmed the `ssbio` partition/QOS name and an sbatch template that
+#      the lab is comfortable running unattended.
+# See webapp/README.md > "Enabling the HCC fallback" for the setup steps.
+# While disabled, the resource guard skips straight to recommending Colab
+# whenever the local queue is full.
+hcc:
+  enabled: false
+  ssh_host: "" # e.g. "swan.unl.edu" or "crane.unl.edu"
+  ssh_user: "" # dedicated HCC account for CatRange, not a personal login
+  ssh_key_path: "" # path (inside the worker container) to a private key
+  partition: "ssbio"
+  # Optional QOS/account name if your ssbio allocation requires one.
+  account: ""
+  qos: ""
+  remote_work_dir: "/work/ssbio/catrange_jobs"
+  # Maximum jobs to have in flight on HCC at once, independent of the local
+  # queue limit above.
+  max_concurrent_jobs: 2
+  poll_interval_seconds: 60
+
+# --- Optional email notifications ------------------------------------------
+# Leave `enabled: false` until an SMTP account/app-password is available.
+email:
+  enabled: false
+  smtp_host: "smtp.gmail.com"
+  smtp_port: 587
+  smtp_username: ""
+  smtp_password: "" # use an app password / secret, never a plain account password
+  from_address: "catrange@sahassbio.com"
+
+# --- Public site info -------------------------------------------------------
+site:
+  base_url: "https://catrange.sahassbio.com"
+  colab_url: "https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb"
+
+# --- Storage ----------------------------------------------------------------
+storage:
+  data_dir: "/data" # shared volume between api and worker containers
+  job_ttl_days: 14 # how long finished job files are kept before cleanup

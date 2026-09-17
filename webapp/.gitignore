@@ -1,0 +1,5 @@
+# Real settings (with credentials/hostnames) — never commit these.
+config/settings.yaml
+secrets/
+*.env
+.env
