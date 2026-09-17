@@ -6,6 +6,17 @@ x-worker-env: &worker-env
   REDIS_URL: redis://redis:6379/0
 
 services:
+  # Reverse proxy + TLS termination for the backend API only.
+  #
+  # This project's confirmed deployment is SPLIT: the static frontend
+  # (../frontend) is uploaded directly to Hostinger Premium Web Hosting's
+  # public_html (that plan can't run Docker), and this nginx — on your
+  # separate Docker/GPU server — only needs to serve the ACME challenge and
+  # reverse-proxy /api/ (see nginx/conf.d/catrange.conf and
+  # webapp/README.md). The ../frontend volume mount below is commented out
+  # accordingly; uncomment it only if you later co-locate the frontend on
+  # this same server instead of Hostinger (see the "Co-located alternative"
+  # note at the bottom of nginx/conf.d/catrange.conf).
   nginx:
     image: nginx:1.27-alpine
     restart: unless-stopped
@@ -15,7 +26,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./frontend:/usr/share/nginx/html:ro
+      # - ./frontend:/usr/share/nginx/html:ro
       - certbot_www:/var/www/certbot:ro
       - certbot_conf:/etc/letsencrypt:ro
     depends_on:

@@ -55,6 +55,12 @@ email:
 
 # --- Public site info -------------------------------------------------------
 site:
+  # This is the FRONTEND's public URL (job.html lives there), used to build
+  # the job-status link inside email notifications
+  # (e.g. "https://catrange.sahassbio.com/job.html?id=..."). Since the
+  # frontend is static and hosted separately on Hostinger, this stays
+  # catrange.sahassbio.com even though the backend itself runs elsewhere —
+  # see webapp/README.md's "split hosting" section.
   base_url: "https://catrange.sahassbio.com"
   colab_url: "https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb"
 

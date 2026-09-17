@@ -1,8 +1,12 @@
 // CatRange hosted-service frontend logic.
-// Talks to the FastAPI backend under /api, mounted by nginx alongside this
-// static site.
+// Talks to the FastAPI backend at CATRANGE_API_BASE + "/api" (see
+// config.js). CATRANGE_API_BASE is "" for a same-origin deployment (the
+// default single-host docker-compose.yml layout) or an absolute URL when
+// the frontend is hosted separately from the backend (e.g. a static host
+// like Hostinger Premium Web Hosting alongside a backend on another
+// server).
 
-const API_BASE = "/api";
+const API_BASE = `${window.CATRANGE_API_BASE || ""}/api`;
 const MAX_INTERACTIVE_PAIRS = 10;
 
 function qs(id) {
@@ -143,7 +147,10 @@ function initJobPage() {
       detailEl.textContent = job.detail || "";
 
       if (job.status === "done" && job.download_url) {
-        downloadLink.href = job.download_url;
+        // job.download_url from the API is a path like "/api/jobs/<id>/download";
+        // prefix it with CATRANGE_API_BASE so it still resolves when the
+        // frontend and backend are hosted on different origins.
+        downloadLink.href = `${window.CATRANGE_API_BASE || ""}${job.download_url}`;
         resultsLink.hidden = false;
       }
 
