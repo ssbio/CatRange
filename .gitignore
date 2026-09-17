@@ -52,3 +52,6 @@ build/
 dist/
 
 ignore/
+
+# Local Impeccable design-skill cache (session-local, not part of the repo).
+.impeccable/

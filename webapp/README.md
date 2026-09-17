@@ -24,22 +24,26 @@ This means the deployment **must be split across two hosts**:
 
 | Piece | Where it goes | What to upload/deploy |
 | --- | --- | --- |
-| Static landing page + job status page | Hostinger `public_html` | Only the 5 files in `webapp/frontend/`: `index.html`, `job.html`, `styles.css`, `app.js`, `config.js` |
+| Static landing page + job status page | Hostinger `public_html` | Everything in `webapp/frontend/`: `index.html`, `job.html`, `styles.css`, `app.js`, `config.js`, and the `assets/` folder (logos, figures, site icon) |
 | API + worker + Redis + model files | A separate Linux server with Docker (and ideally a GPU) | The `webapp/` folder (minus `frontend/`, which isn't needed there) |
 
-**Do not upload the whole repository to `public_html`.** Upload only the 5
-files listed above from `webapp/frontend/`.
+**Do not upload the whole repository to `public_html`.** Upload only the
+contents of `webapp/frontend/` listed above.
 
 ```
 webapp/
   docker-compose.yml
   nginx/            reverse proxy + TLS termination for the API (backend server only)
-  frontend/         <-- THIS is what goes to Hostinger public_html
+  frontend/         <-- THIS folder's contents go to Hostinger public_html
     index.html
     job.html
     styles.css
     app.js
     config.js        <-- edit this one file to point at your backend's URL
+    assets/
+      catrange-mark.png        site icon / brand mark
+      logos/                   collaborating-institution logos (UNL, Iowa State, USF)
+      figures/                 evidence figure used in the "Evolution" section
   common/           shared config/DB/job-queue code (used by api + worker)
   api/              FastAPI job-submission/status service (backend server only)
   worker/           runs inference/catrange_inference.py (backend server only)
@@ -54,13 +58,16 @@ webapp/
    `public_html/catrange` if it's a subdomain of `sahassbio.com`, or the
    subdomain's own root if Hostinger created a separate one — check
    **Domains → Subdomains** in hPanel for the exact path).
-2. Upload exactly these files from `webapp/frontend/` into that folder,
-   flat (no subfolder):
+2. Upload the entire contents of `webapp/frontend/` into that folder,
+   preserving the folder structure (the `assets/` subfolder — including
+   `assets/logos/` and `assets/figures/` — must come along, or the page's
+   logos and evidence figure will 404):
    - `index.html`
    - `job.html`
    - `styles.css`
    - `app.js`
    - `config.js`
+   - `assets/` (whole folder, with subfolders intact)
 3. Edit `config.js` (via File Manager's code editor, or edit locally and
    re-upload) and set:
 
