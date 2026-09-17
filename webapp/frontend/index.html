@@ -30,15 +30,17 @@
   <header class="hero">
     <div class="wrap">
       <span class="eyebrow">Published in PNAS&nbsp;Nexus &middot; <a href="https://doi.org/10.1093/pnasnexus/pgag309" target="_blank" rel="noopener">doi.org/10.1093/pnasnexus/pgag309</a></span>
-      <h1>Predict how a mutation changes an enzyme's speed</h1>
+      <h1 class="hero-title">CatRange: Catalytically Aware and Mutation-Resolved Kinetics Prediction To Enable Variational Modeling of Enzyme-Substrate Systems</h1>
       <p class="subtitle">
-        Give CatRange a protein sequence and a substrate (as SMILES), and it predicts
-        likely ranges for two kinetic numbers: <strong>k<sub>cat</sub></strong> (how fast
-        the enzyme works) and <strong>K<sub>M</sub></strong> (how much substrate it
-        needs). It works for both normal (wild-type) and mutated sequences.
+        Give it a protein sequence and a substrate (as SMILES) and get back likely
+        ranges for <strong>k<sub>cat</sub></strong> (how fast) and
+        <strong>K<sub>M</sub></strong> (how much substrate is needed) — for wild-type
+        and mutated sequences alike.
       </p>
-      <p class="lab-line">A collaboration between labs at Iowa State University, the University of Nebraska–Lincoln, and the University of South Florida.</p>
-      <p class="pi-line">See the <a href="about.html">full story of how CatRange evolved</a> or meet the <a href="team.html">team behind it</a>.</p>
+      <p class="lab-line">
+        A collaboration between Iowa State University, the University of Nebraska–Lincoln, and the University of South Florida —
+        see <a href="about.html">how CatRange evolved</a> or meet the <a href="team.html">team behind it</a>.
+      </p>
 
       <div class="hero-actions">
         <a class="btn btn-primary" href="https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb" target="_blank" rel="noopener">
@@ -101,10 +103,17 @@
               </select>
             </div>
 
-            <div id="interactive-block" class="field" hidden>
-              <label for="pairs">Sequence,SMILES pairs (one per line)</label>
-              <textarea id="pairs" name="pairs" rows="6" placeholder="MKT...,CCO"></textarea>
-              <p class="hint">Up to 10 pairs. Each line: <code>sequence,Isomeric SMILES</code></p>
+            <div id="interactive-block" class="field-pair" hidden>
+              <div class="field">
+                <label for="sequences">Protein / enzyme sequences</label>
+                <textarea id="sequences" name="sequences" rows="6" placeholder="MKT..."></textarea>
+                <p class="hint">One sequence per line, up to 10.</p>
+              </div>
+              <div class="field">
+                <label for="smiles-list">Substrate SMILES (Isomeric)</label>
+                <textarea id="smiles-list" name="smiles-list" rows="6" placeholder="CCO"></textarea>
+                <p class="hint">One SMILES per line — line 1 pairs with sequence line 1, and so on.</p>
+              </div>
             </div>
 
             <div id="csv-block" class="field" hidden>
@@ -117,6 +126,15 @@
             </div>
 
             <div class="field">
+              <label>Show results for</label>
+              <div class="target-toggle">
+                <label class="toggle-pill"><input type="checkbox" id="target-kcat" checked /> k<sub>cat</sub></label>
+                <label class="toggle-pill"><input type="checkbox" id="target-km" checked /> K<sub>M</sub></label>
+              </div>
+              <p class="hint">CatRange always predicts both together — this only picks what's highlighted in your results, just like on CatPred.</p>
+            </div>
+
+            <div class="field">
               <label for="email">Email (optional — get notified when results are ready)</label>
               <input type="email" id="email" name="email" placeholder="you@example.edu" />
             </div>
@@ -126,6 +144,21 @@
 
           <p id="form-status" class="form-status" role="status"></p>
         </div>
+      </div>
+    </section>
+
+    <section class="section" id="citation">
+      <div class="citation-card">
+        <span class="mono-label">Please cite</span>
+        <p class="cite-text">
+          Sajeevan KA, Osinuga A, Arunraj B, Ferdous S, Shahreen N, Noor MS, Koneru S,
+          Santos-Correa LM, Salehi R, Chowdhury NB, Aryee R, Calderon-Lopez B, Dey S,
+          Mali A, Saha R, Chowdhury R.
+          <strong>CatRange enables robust prediction of enzyme variant kinetic regimes.</strong>
+          <em>PNAS Nexus</em>. 2026;pgag309.
+          doi: <a href="https://doi.org/10.1093/pnasnexus/pgag309" target="_blank" rel="noopener">10.1093/pnasnexus/pgag309</a>
+        </p>
+        <a class="cite-more" href="team.html#citation">Full citation &amp; RealKcat lineage &rarr;</a>
       </div>
     </section>
   </main>

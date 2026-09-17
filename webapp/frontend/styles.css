@@ -21,6 +21,12 @@
   --gold: #b45309;
   --bad: #b3261e;
 
+  /* SSB Lab (sahassbio.com) brand accent — used for the citation block so
+     it visually nods to the home lab's own site theme. */
+  --ssb-accent: #e65616;
+  --ssb-accent-light: #ffb08a;
+  --ssb-ink: #1f1f1f;
+
   --gradient-accent: linear-gradient(120deg, var(--violet), var(--magenta));
 
   --radius-sm: 8px;
@@ -138,47 +144,54 @@ code {
   background: var(--bg-tint);
   border-bottom: 3px solid transparent;
   border-image: var(--gradient-accent) 1;
-  padding: 3rem 0 2.6rem;
+  padding: 2.1rem 0 1.9rem;
 }
 
 .eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--violet);
+  color: var(--violet-dark);
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.76rem;
-  font-weight: 500;
+  font-size: 0.74rem;
+  font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
-.eyebrow a { color: var(--violet); text-decoration: underline; text-underline-offset: 2px; }
+.eyebrow a { color: var(--violet-dark); text-decoration: underline; text-underline-offset: 2px; }
 
-.hero h1 {
-  margin: 0 0 0.7rem;
-  font-size: 1.9rem;
+.hero-title {
+  margin: 0 0 0.55rem;
+  font-size: 1.3rem;
   font-weight: 800;
-  line-height: 1.25;
-  max-width: 40rem;
+  line-height: 1.35;
+  max-width: 46rem;
+  letter-spacing: -0.005em;
 }
 .hero .subtitle {
-  margin: 0 0 1.2rem;
-  font-size: 1.05rem;
+  margin: 0 0 0.7rem;
+  font-size: 0.98rem;
   color: var(--ink-soft);
-  max-width: 36rem;
+  max-width: 38rem;
 }
 .hero .lab-line {
-  margin: 0 0 0.25rem;
-  font-size: 0.92rem;
+  margin: 0 0 1.3rem;
+  font-size: 0.86rem;
   color: var(--muted);
+  max-width: 42rem;
 }
-.hero .pi-line {
-  margin: 0 0 1.6rem;
-  font-size: 0.9rem;
-  color: var(--muted);
+
+/* Links inside the hero need to stand out from the light violet-tinted
+   background instead of blending into it — darker, bolder, underlined.
+   (Excludes the CTA buttons below, which have their own styling.) */
+.hero a:not(.btn) {
+  color: var(--violet-dark);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
-.hero .pi-line strong { color: var(--ink-soft); font-weight: 700; }
+.hero a:not(.btn):hover { color: var(--magenta); }
 
 .hero-actions {
   display: flex;
@@ -194,7 +207,7 @@ code {
   border-radius: 999px;
   font-weight: 700;
   font-size: 0.95rem;
-  text-decoration: none;
+  text-decoration: none !important;
   border: none;
   cursor: pointer;
   transition: transform 0.12s ease, filter 0.12s ease;
@@ -364,6 +377,36 @@ main.wrap { padding-top: 2.6rem; padding-bottom: 3rem; }
 .field textarea { resize: vertical; font-family: "IBM Plex Mono", Consolas, monospace; }
 .hint { margin: 0; color: var(--muted); font-size: 0.84rem; }
 
+.field-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 560px) { .field-pair { grid-template-columns: 1fr; } }
+
+.target-toggle { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--muted);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+.toggle-pill input { accent-color: var(--violet); }
+.toggle-pill:has(input:checked),
+.toggle-pill.is-checked {
+  border-color: var(--violet);
+  color: var(--violet-dark);
+  background: var(--bg-tint);
+}
+
 button {
   align-self: flex-start;
   background: var(--violet);
@@ -383,15 +426,54 @@ button:disabled { background: #cabfe0; cursor: not-allowed; }
 .form-status.success { color: var(--green); }
 
 .citation {
-  color: var(--muted);
-  font-size: 0.9rem;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.75;
   font-style: italic;
   background: var(--bg-tint);
   border-radius: var(--radius-sm);
-  padding: 0.85rem 1rem;
+  padding: 1.1rem 1.3rem;
   margin: 0.8rem 0;
 }
-.citation.formal { font-style: normal; }
+.citation.formal { font-style: normal; font-size: 1.02rem; }
+
+/* -------------------------------------------------------------------------
+   Citation card — landing page only, styled to nod at the SSB Lab's own
+   site theme (sahassbio.com's dark header + burnt-orange accent) rather
+   than the site's default violet, since this specifically credits the
+   published paper.
+   ------------------------------------------------------------------------- */
+.citation-card {
+  background: var(--ssb-ink);
+  color: #f2ede4;
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.2rem 1.8rem;
+  border-bottom: 3px solid var(--ssb-accent);
+}
+.citation-card .mono-label {
+  color: var(--ssb-accent-light);
+  display: block;
+  margin-bottom: 0.7rem;
+}
+.citation-card .cite-text {
+  margin: 0 0 1.1rem;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #f2ede4;
+}
+.citation-card .cite-text strong { color: #fff; }
+.citation-card .cite-text a { color: var(--ssb-accent-light); text-decoration: underline; text-underline-offset: 2px; }
+.citation-card .cite-text a:hover { color: #fff; }
+.citation-card .cite-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--ssb-accent-light);
+  text-decoration: none;
+}
+.citation-card .cite-more:hover { color: #fff; }
 
 /* -------------------------------------------------------------------------
    Evolution timeline
@@ -637,6 +719,6 @@ button:disabled { background: #cabfe0; cursor: not-allowed; }
 #progress-detail { color: var(--muted); white-space: pre-wrap; font-size: 0.9rem; }
 
 @media (max-width: 640px) {
-  .hero h1 { font-size: 1.55rem; }
+  .hero-title { font-size: 1.12rem; }
   .nav-links { display: none; }
 }

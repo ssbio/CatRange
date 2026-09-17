@@ -31,19 +31,39 @@ function initLandingPage() {
   modeSelect.addEventListener("change", syncModeVisibility);
   syncModeVisibility();
 
-  function parsePairs(raw) {
-    return raw
+  // "Show results for" kcat/KM toggle — mirrors CatPred's UX. CatRange
+  // always predicts both values together; this only records which one(s)
+  // the user wants highlighted, so at least one box must stay checked.
+  const targetKcat = qs("target-kcat");
+  const targetKm = qs("target-km");
+  if (targetKcat && targetKm) {
+    [targetKcat, targetKm].forEach((box) => {
+      box.addEventListener("change", () => {
+        if (!targetKcat.checked && !targetKm.checked) {
+          box.checked = true;
+        }
+        // Fallback for browsers without :has() support.
+        box.closest(".toggle-pill").classList.toggle("is-checked", box.checked);
+      });
+      box.closest(".toggle-pill").classList.toggle("is-checked", box.checked);
+    });
+  }
+
+  function parsePairs(sequencesRaw, smilesRaw) {
+    const sequences = sequencesRaw
       .split("\n")
       .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const idx = line.indexOf(",");
-        if (idx === -1) return null;
-        return {
-          sequence: line.slice(0, idx).trim(),
-          smiles: line.slice(idx + 1).trim(),
-        };
-      });
+      .filter(Boolean);
+    const smilesList = smilesRaw
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (sequences.length !== smilesList.length) {
+      throw new Error(
+        `Sequences (${sequences.length}) and SMILES (${smilesList.length}) must have the same number of lines, in matching order.`
+      );
+    }
+    return sequences.map((sequence, i) => ({ sequence, smiles: smilesList[i] }));
   }
 
   form.addEventListener("submit", async (event) => {
@@ -60,15 +80,18 @@ function initLandingPage() {
       formData.append("mode", mode);
       if (email) formData.append("email", email);
 
+      // Which kinetic value(s) the user wants highlighted (both by default).
+      // CatRange always computes both kcat and KM together — this is purely
+      // a results-display preference, not a change to what gets computed.
+      const preferredTargets = [];
+      if (!targetKcat || targetKcat.checked) preferredTargets.push("kcat");
+      if (!targetKm || targetKm.checked) preferredTargets.push("km");
+      formData.append("preferred_targets", preferredTargets.join(","));
+
       if (mode === "interactive") {
-        const pairs = parsePairs(qs("pairs").value);
+        const pairs = parsePairs(qs("sequences").value, qs("smiles-list").value);
         if (!pairs.length) {
-          throw new Error("Enter at least one sequence,SMILES pair.");
-        }
-        if (pairs.some((p) => p === null)) {
-          throw new Error(
-            "Each line must be 'sequence,Isomeric SMILES' separated by a comma."
-          );
+          throw new Error("Enter at least one sequence and one matching SMILES.");
         }
         if (pairs.length > MAX_INTERACTIVE_PAIRS) {
           throw new Error(`Interactive mode accepts up to ${MAX_INTERACTIVE_PAIRS} pairs. Use Bulk CSV for more.`);
