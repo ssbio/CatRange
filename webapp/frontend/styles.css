@@ -1,34 +1,34 @@
 /* =========================================================================
    CatRange — design tokens
-   Palette takes its cue from the enzyme-kinetics cycle motif (magenta/violet
-   substrate branch, green product branch) rather than generic "SaaS blue".
+   Calm, paper-like scientific-tool aesthetic: mostly neutral surfaces, one
+   accent color reserved for actions/links, monospace used only for small
+   labels and code — not a loud marketing gradient everywhere.
    ========================================================================= */
 :root {
   --ink: #171425;
   --ink-soft: #372f52;
   --muted: #665f7d;
-  --bg: #faf9fd;
-  --bg-tint: #f3effc;
+  --bg: #fbfaf9;
+  --bg-tint: #f4f1fb;
   --card: #ffffff;
-  --border: #e6e1f5;
+  --border: #e7e3ec;
 
   --violet: #6d28d9;
   --violet-dark: #4c1d95;
-  --magenta: #c026d3;
+  --magenta: #a726c1;
   --green: #15803d;
   --green-bright: #22c55e;
-  --gold: #d97706;
+  --gold: #b45309;
   --bad: #b3261e;
 
-  --gradient-hero: linear-gradient(135deg, #241a4d 0%, #5b21b6 46%, #c026d3 100%);
   --gradient-accent: linear-gradient(120deg, var(--violet), var(--magenta));
 
   --radius-sm: 8px;
   --radius: 14px;
   --radius-lg: 20px;
-  --shadow-card: 0 1px 2px rgba(23, 20, 37, 0.04), 0 8px 24px -12px rgba(76, 29, 149, 0.18);
-  --shadow-pop: 0 12px 32px -8px rgba(76, 29, 149, 0.35);
-  --max: 980px;
+  --shadow-card: 0 1px 2px rgba(23, 20, 37, 0.04), 0 6px 18px -12px rgba(76, 29, 149, 0.14);
+  --shadow-pop: 0 12px 32px -8px rgba(76, 29, 149, 0.28);
+  --max: 900px;
 }
 
 * { box-sizing: border-box; }
@@ -59,16 +59,26 @@ code {
   border-radius: 4px;
   padding: 0.1rem 0.35rem;
   font-size: 0.9em;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+.mono-label {
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--violet);
 }
 
 /* -------------------------------------------------------------------------
-   Top navigation
+   Top navigation — shared across every page
    ------------------------------------------------------------------------- */
 .site-nav {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(250, 249, 253, 0.88);
+  background: rgba(251, 250, 249, 0.92);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
@@ -84,18 +94,18 @@ code {
   align-items: center;
   gap: 0.55rem;
   font-weight: 800;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: var(--ink);
   text-decoration: none;
   white-space: nowrap;
 }
-.brand img { width: 28px; height: 28px; display: block; }
+.brand img { width: 26px; height: 26px; display: block; }
 .brand:hover { color: var(--violet); }
 
 .nav-links {
   display: flex;
-  gap: 1.35rem;
-  margin: 0 auto 0 0.5rem;
+  gap: 1.4rem;
+  margin: 0 auto 0 0.75rem;
   flex-wrap: wrap;
   font-size: 0.92rem;
   font-weight: 600;
@@ -103,82 +113,72 @@ code {
 .nav-links a {
   color: var(--ink-soft);
   text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
 }
 .nav-links a:hover { color: var(--violet); }
+.nav-links a.current { color: var(--violet); border-bottom-color: var(--violet); }
 
 .nav-cta {
-  background: var(--gradient-accent);
+  background: var(--violet);
   color: #fff !important;
   padding: 0.5rem 1.05rem;
   border-radius: 999px;
   text-decoration: none;
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   white-space: nowrap;
-  box-shadow: 0 4px 14px -4px rgba(192, 38, 211, 0.55);
 }
-.nav-cta:hover { color: #fff !important; filter: brightness(1.08); }
+.nav-cta:hover { color: #fff !important; background: var(--violet-dark); }
 
 /* -------------------------------------------------------------------------
-   Hero
+   Hero — calm, mostly-neutral, paper-like (index.html only)
    ------------------------------------------------------------------------- */
 .hero {
-  background: var(--gradient-hero);
-  color: #fff;
-  padding: 3.2rem 0 3.4rem;
-  position: relative;
-  overflow: hidden;
+  background: var(--bg-tint);
+  border-bottom: 3px solid transparent;
+  border-image: var(--gradient-accent) 1;
+  padding: 3rem 0 2.6rem;
 }
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.14), transparent 45%);
-  pointer-events: none;
-}
-.hero .wrap { position: relative; }
 
 .eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  padding: 0.3rem 0.85rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  color: var(--violet);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
 }
-.eyebrow a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+.eyebrow a { color: var(--violet); text-decoration: underline; text-underline-offset: 2px; }
 
 .hero h1 {
-  color: #fff;
-  margin: 0 0 0.6rem;
-  font-size: 2.05rem;
+  margin: 0 0 0.7rem;
+  font-size: 1.9rem;
   font-weight: 800;
-  line-height: 1.2;
-  max-width: 42rem;
+  line-height: 1.25;
+  max-width: 40rem;
 }
 .hero .subtitle {
-  margin: 0 0 1.4rem;
-  font-size: 1.08rem;
-  color: rgba(255, 255, 255, 0.92);
-  max-width: 38rem;
+  margin: 0 0 1.2rem;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  max-width: 36rem;
 }
 .hero .lab-line {
-  margin: 0 0 0.3rem;
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 0.25rem;
+  font-size: 0.92rem;
+  color: var(--muted);
 }
 .hero .pi-line {
-  margin: 0 0 1.8rem;
-  font-size: 0.92rem;
-  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 1.6rem;
+  font-size: 0.9rem;
+  color: var(--muted);
 }
-.hero .pi-line strong { color: #fff; font-weight: 700; }
+.hero .pi-line strong { color: var(--ink-soft); font-weight: 700; }
 
 .hero-actions {
   display: flex;
@@ -190,10 +190,10 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.72rem 1.4rem;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 0.96rem;
+  font-size: 0.95rem;
   text-decoration: none;
   border: none;
   cursor: pointer;
@@ -203,15 +203,15 @@ code {
 .btn-primary {
   background: var(--green-bright);
   color: #0b3a1c;
-  box-shadow: 0 10px 24px -8px rgba(34, 197, 94, 0.55);
+  box-shadow: 0 8px 20px -8px rgba(34, 197, 94, 0.45);
 }
 .btn-primary:hover { color: #0b3a1c; filter: brightness(1.05); }
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  background: #fff;
+  color: var(--violet);
+  border: 1.5px solid var(--violet);
 }
-.btn-ghost:hover { color: #fff; background: rgba(255, 255, 255, 0.18); }
+.btn-ghost:hover { color: #fff; background: var(--violet); }
 
 .colab-badge img { display: block; height: 30px; }
 
@@ -219,7 +219,7 @@ code {
    Institution logo strip
    ------------------------------------------------------------------------- */
 .logo-strip {
-  background: var(--bg-tint);
+  background: var(--card);
   border-bottom: 1px solid var(--border);
   padding: 1rem 0;
 }
@@ -232,9 +232,9 @@ code {
 }
 .logo-strip p {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--muted);
-  font-weight: 600;
+  font-family: "IBM Plex Mono", monospace;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -245,50 +245,53 @@ code {
   flex-wrap: wrap;
 }
 .logo-strip img {
-  height: 42px;
+  height: 38px;
   width: auto;
-  filter: grayscale(0.15);
+  filter: grayscale(0.1);
   opacity: 0.92;
 }
 
 /* -------------------------------------------------------------------------
+   Simple page header (used by about.html / team.html instead of the hero)
+   ------------------------------------------------------------------------- */
+.page-header {
+  padding: 2.4rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+}
+.page-header .mono-label { display: block; margin-bottom: 0.5rem; }
+.page-header h1 { margin: 0 0 0.5rem; font-size: 1.7rem; }
+.page-header p { margin: 0; color: var(--muted); max-width: 38rem; }
+
+/* -------------------------------------------------------------------------
    Sections & cards
    ------------------------------------------------------------------------- */
-main.wrap { padding-top: 3rem; padding-bottom: 3rem; }
+main.wrap { padding-top: 2.6rem; padding-bottom: 3rem; }
 
-.section { padding: 2.6rem 0; }
+.section { padding: 2.4rem 0; }
 .section + .section { border-top: 1px solid var(--border); }
-.section-head { max-width: 40rem; margin: 0 auto 2rem; text-align: center; }
-.section-head .kicker {
-  display: inline-block;
-  color: var(--violet);
-  font-weight: 800;
-  font-size: 0.78rem;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-}
-.section-head h2 { font-size: 1.65rem; margin: 0 0 0.6rem; }
+.section-head { max-width: 40rem; margin: 0 auto 1.8rem; }
+.section-head .mono-label { display: block; margin-bottom: 0.5rem; }
+.section-head h2 { font-size: 1.4rem; margin: 0 0 0.5rem; }
 .section-head p { color: var(--muted); margin: 0; }
 
 .card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.6rem 1.85rem;
+  padding: 1.5rem 1.75rem;
   margin-bottom: 1.5rem;
   box-shadow: var(--shadow-card);
 }
 
 .card.recommended {
-  border-color: #b9f3cf;
-  background: linear-gradient(180deg, #f2fdf6, #ffffff 55%);
+  border-color: #bce9cc;
+  background: #f5fdf8;
 }
 .card.recommended h2 { color: var(--green); }
 
-.card h2 { margin-top: 0; font-size: 1.25rem; }
+.card h2 { margin-top: 0; font-size: 1.2rem; }
 
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; align-items: start; }
 @media (max-width: 780px) { .grid-2 { grid-template-columns: 1fr; } }
 
 /* Mode cards ("How CatRange works") */
@@ -305,23 +308,23 @@ main.wrap { padding-top: 3rem; padding-bottom: 3rem; }
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.25rem 1.15rem;
-  box-shadow: var(--shadow-card);
+  padding: 1.2rem 1.1rem;
 }
 .mode-card .mode-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
-  margin-bottom: 0.7rem;
-  background: var(--gradient-accent);
-  color: #fff;
+  font-size: 1.05rem;
+  margin-bottom: 0.65rem;
+  background: var(--bg-tint);
+  color: var(--violet);
+  border: 1px solid var(--border);
 }
-.mode-card h3 { margin: 0 0 0.35rem; font-size: 1.02rem; }
-.mode-card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+.mode-card h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+.mode-card p { margin: 0; color: var(--muted); font-size: 0.87rem; }
 
 .mech-note {
   margin-top: 1.1rem;
@@ -339,7 +342,7 @@ main.wrap { padding-top: 3rem; padding-bottom: 3rem; }
 .job-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
 
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
-.field label { font-weight: 700; font-size: 0.88rem; color: var(--ink-soft); }
+.field label { font-weight: 700; font-size: 0.87rem; color: var(--ink-soft); }
 .field textarea,
 .field select,
 .field input[type="email"],
@@ -356,25 +359,24 @@ main.wrap { padding-top: 3rem; padding-bottom: 3rem; }
 .field input:focus {
   outline: none;
   border-color: var(--violet);
-  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.13);
 }
-.field textarea { resize: vertical; font-family: "SFMono-Regular", Consolas, monospace; }
-.hint { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.field textarea { resize: vertical; font-family: "IBM Plex Mono", Consolas, monospace; }
+.hint { margin: 0; color: var(--muted); font-size: 0.84rem; }
 
 button {
   align-self: flex-start;
-  background: var(--gradient-accent);
+  background: var(--violet);
   color: #fff;
   border: none;
-  padding: 0.7rem 1.6rem;
+  padding: 0.68rem 1.5rem;
   border-radius: 999px;
   font-weight: 700;
   cursor: pointer;
-  font-size: 0.95rem;
-  box-shadow: 0 8px 20px -8px rgba(109, 40, 217, 0.5);
+  font-size: 0.94rem;
 }
-button:hover { filter: brightness(1.08); }
-button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
+button:hover { background: var(--violet-dark); }
+button:disabled { background: #cabfe0; cursor: not-allowed; }
 
 .form-status { min-height: 1.2em; font-weight: 700; }
 .form-status.error { color: var(--bad); }
@@ -386,9 +388,10 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
   font-style: italic;
   background: var(--bg-tint);
   border-radius: var(--radius-sm);
-  padding: 0.8rem 1rem;
+  padding: 0.85rem 1rem;
   margin: 0.8rem 0;
 }
+.citation.formal { font-style: normal; }
 
 /* -------------------------------------------------------------------------
    Evolution timeline
@@ -404,13 +407,12 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
   left: 0.55rem;
   top: 0.4rem;
   bottom: 0.4rem;
-  width: 3px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, var(--violet), var(--magenta), var(--green-bright));
+  width: 2px;
+  background: var(--border);
 }
 .timeline-item {
   position: relative;
-  padding-bottom: 2.1rem;
+  padding-bottom: 2rem;
 }
 .timeline-item:last-child { padding-bottom: 0; }
 .timeline-item::before {
@@ -418,12 +420,11 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
   position: absolute;
   left: -2rem;
   top: 0.28rem;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: #fff;
   border: 3px solid var(--violet);
-  box-shadow: 0 0 0 4px var(--bg);
 }
 .timeline-item.milestone-realkcat::before { border-color: var(--magenta); }
 .timeline-item.milestone-catrange::before { border-color: var(--green-bright); }
@@ -431,22 +432,20 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
 
 .timeline-item .tag {
   display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--violet);
-  background: var(--bg-tint);
-  border-radius: 999px;
-  padding: 0.2rem 0.65rem;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.4rem;
 }
-.timeline-item.milestone-realkcat .tag { color: var(--magenta); background: #fbe8fc; }
-.timeline-item.milestone-catrange .tag { color: var(--green); background: #e6f7ec; }
-.timeline-item.milestone-today .tag { color: var(--gold); background: #fdf1e0; }
+.timeline-item.milestone-realkcat .tag { color: var(--magenta); }
+.timeline-item.milestone-catrange .tag { color: var(--green); }
+.timeline-item.milestone-today .tag { color: var(--gold); }
 
-.timeline-item h3 { margin: 0 0 0.4rem; font-size: 1.12rem; }
-.timeline-item p { margin: 0 0 0.6rem; color: var(--ink-soft); font-size: 0.95rem; }
+.timeline-item h3 { margin: 0 0 0.4rem; font-size: 1.08rem; }
+.timeline-item p { margin: 0 0 0.6rem; color: var(--ink-soft); font-size: 0.94rem; }
 .timeline-item p:last-child { margin-bottom: 0; }
 .timeline-item .stat-row {
   display: flex;
@@ -455,29 +454,28 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
   margin: 0.7rem 0;
 }
 .stat-pill {
-  background: #fff;
-  border: 1.5px solid var(--border);
+  background: var(--bg-tint);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 0.45rem 0.8rem;
-  font-size: 0.82rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--ink-soft);
 }
 .stat-pill b { color: var(--violet); }
 
 .evidence-figure {
-  margin-top: 1.75rem;
+  margin-top: 1.6rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
   background: #fff;
-  box-shadow: var(--shadow-card);
 }
 .evidence-figure img { display: block; width: 100%; height: auto; }
 .evidence-figure figcaption {
   padding: 1rem 1.3rem 1.2rem;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.85rem;
 }
 .evidence-figure figcaption strong { color: var(--ink-soft); }
 
@@ -487,7 +485,7 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
 .resource-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.1rem;
+  gap: 1rem;
 }
 @media (max-width: 700px) { .resource-grid { grid-template-columns: 1fr; } }
 
@@ -498,54 +496,76 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.2rem 1.3rem;
+  padding: 1.15rem 1.3rem;
   text-decoration: none;
   color: inherit;
-  box-shadow: var(--shadow-card);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  transition: transform 0.12s ease, border-color 0.12s ease;
 }
 .resource-card:hover {
   transform: translateY(-2px);
   border-color: var(--violet);
-  box-shadow: var(--shadow-pop);
 }
 .resource-card .r-icon {
   flex: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
-  background: var(--gradient-accent);
-  color: #fff;
+  font-size: 1.2rem;
+  background: var(--bg-tint);
+  border: 1px solid var(--border);
 }
 .resource-card h3 { margin: 0 0 0.25rem; font-size: 1rem; color: var(--ink); }
 .resource-card p { margin: 0; font-size: 0.85rem; color: var(--muted); }
 .resource-card .r-meta {
   display: block;
   margin-top: 0.4rem;
-  font-size: 0.78rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.74rem;
   color: var(--violet);
-  font-weight: 700;
+}
+
+/* -------------------------------------------------------------------------
+   Labs (three collaborating institutions)
+   ------------------------------------------------------------------------- */
+.lab-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+@media (max-width: 780px) { .lab-grid { grid-template-columns: 1fr; } }
+
+.lab-card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.3rem 1.3rem 1.4rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.lab-card:hover { transform: translateY(-2px); border-color: var(--violet); }
+.lab-card img { height: 44px; width: auto; margin-bottom: 0.9rem; }
+.lab-card h3 { margin: 0 0 0.3rem; font-size: 1rem; color: var(--ink); }
+.lab-card p { margin: 0 0 0.6rem; font-size: 0.85rem; color: var(--muted); }
+.lab-card .r-meta {
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.74rem;
+  color: var(--violet);
 }
 
 /* -------------------------------------------------------------------------
    Team / PI section
    ------------------------------------------------------------------------- */
-.team-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.6rem 1.85rem;
-  box-shadow: var(--shadow-card);
-}
 .pi-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  margin: 1.2rem 0 0.5rem;
+  margin: 0.5rem 0;
 }
 @media (max-width: 700px) { .pi-grid { grid-template-columns: 1fr; } }
 .pi-card {
@@ -554,16 +574,49 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
   padding: 1rem 1.1rem;
   background: var(--bg-tint);
 }
-.pi-card .pi-name { font-weight: 800; color: var(--ink); font-size: 0.98rem; }
+.pi-card .pi-name { font-weight: 800; color: var(--ink); font-size: 0.97rem; }
 .pi-card .pi-role { color: var(--muted); font-size: 0.82rem; margin-top: 0.15rem; }
+.pi-card .pi-lab { color: var(--violet); font-size: 0.8rem; margin-top: 0.35rem; font-weight: 600; }
+
+/* Software developers (GitHub contributors, pulled from both repos) */
+.developer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+@media (max-width: 700px) { .developer-grid { grid-template-columns: 1fr; } }
+
+.developer-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.developer-card:hover { transform: translateY(-2px); border-color: var(--violet); }
+.developer-card img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  flex: none;
+}
+.developer-card .dev-name { font-weight: 700; color: var(--ink); font-size: 0.92rem; }
+.developer-card .dev-repo { color: var(--muted); font-size: 0.78rem; margin-top: 0.1rem; }
 
 /* -------------------------------------------------------------------------
    Footer
    ------------------------------------------------------------------------- */
 .site-footer {
   background: var(--ink);
-  color: rgba(255, 255, 255, 0.75);
-  padding: 2.4rem 0 2.6rem;
+  color: rgba(255, 255, 255, 0.72);
+  padding: 2.2rem 0 2.4rem;
   margin-top: 1rem;
 }
 .site-footer .wrap {
@@ -571,7 +624,7 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  font-size: 0.88rem;
+  font-size: 0.87rem;
 }
 .site-footer a { color: rgba(255, 255, 255, 0.85); }
 .site-footer a:hover { color: #fff; }
@@ -584,6 +637,6 @@ button:disabled { background: #cabfe0; box-shadow: none; cursor: not-allowed; }
 #progress-detail { color: var(--muted); white-space: pre-wrap; font-size: 0.9rem; }
 
 @media (max-width: 640px) {
-  .hero h1 { font-size: 1.6rem; }
+  .hero h1 { font-size: 1.55rem; }
   .nav-links { display: none; }
 }

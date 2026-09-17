@@ -24,7 +24,7 @@ This means the deployment **must be split across two hosts**:
 
 | Piece | Where it goes | What to upload/deploy |
 | --- | --- | --- |
-| Static landing page + job status page | Hostinger `public_html` | Everything in `webapp/frontend/`: `index.html`, `job.html`, `styles.css`, `app.js`, `config.js`, and the `assets/` folder (logos, figures, site icon) |
+| Static site (home, about, team, job status) | Hostinger `public_html` | Everything in `webapp/frontend/`: `index.html`, `about.html`, `team.html`, `job.html`, `styles.css`, `app.js`, `config.js`, and the `assets/` folder (logos, figures, site icon) |
 | API + worker + Redis + model files | A separate Linux server with Docker (and ideally a GPU) | The `webapp/` folder (minus `frontend/`, which isn't needed there) |
 
 **Do not upload the whole repository to `public_html`.** Upload only the
@@ -35,7 +35,9 @@ webapp/
   docker-compose.yml
   nginx/            reverse proxy + TLS termination for the API (backend server only)
   frontend/         <-- THIS folder's contents go to Hostinger public_html
-    index.html
+    index.html        home page (hero + Run it / job submission)
+    about.html        how CatRange works + evolution timeline
+    team.html         collaborating labs, developers, citation, resources
     job.html
     styles.css
     app.js
@@ -63,6 +65,8 @@ webapp/
    `assets/logos/` and `assets/figures/` — must come along, or the page's
    logos and evidence figure will 404):
    - `index.html`
+   - `about.html`
+   - `team.html`
    - `job.html`
    - `styles.css`
    - `app.js`

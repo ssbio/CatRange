@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About CatRange — how it works &amp; where it came from</title>
+  <meta name="description" content="How CatRange takes input, and the story of how it evolved from the RealKcat classifier into a calibrated, mutation-aware kinetics range predictor." />
+  <link rel="icon" href="assets/catrange-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <img src="assets/catrange-mark.png" alt="" />
+        CatRange
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a class="current" href="about.html">About</a>
+        <a href="team.html">Team &amp; Citation</a>
+      </div>
+      <a class="nav-cta" href="https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb" target="_blank" rel="noopener">Open in Colab</a>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="wrap">
+      <span class="mono-label">About CatRange</span>
+      <h1>How it works, and how it got here</h1>
+      <p>What each input mode does, and the two-paper story behind CatRange's mutation-aware predictions.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="section" id="how-it-works">
+      <div class="section-head">
+        <span class="mono-label">Four ways to feed it</span>
+        <h2>How CatRange takes your input</h2>
+        <p>These are the same four modes in the Colab notebook, also supported by the lab's hosted queue on the <a href="index.html#submit">home page</a>.</p>
+      </div>
+
+      <div class="mode-grid">
+        <div class="mode-card">
+          <div class="mode-icon" aria-hidden="true">&#9654;</div>
+          <h3>Demo</h3>
+          <p>Runs a few built-in example pairs — the fastest way to see CatRange work, no setup needed.</p>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon" aria-hidden="true">&#9998;</div>
+          <h3>Interactive</h3>
+          <p>Type or paste up to 10 sequence/SMILES pairs and get ranges back right away.</p>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon" aria-hidden="true">&#9776;</div>
+          <h3>Bulk</h3>
+          <p>Upload a spreadsheet (CSV) with <code>sequence</code> and <code>Isomeric SMILES</code> columns to score many rows at once.</p>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon" aria-hidden="true">&#9889;</div>
+          <h3>Bulk-large</h3>
+          <p>Same as Bulk, but splits a very large spreadsheet into smaller batches so it doesn't time out.</p>
+        </div>
+      </div>
+
+      <p class="mech-note">
+        Every mode uses <strong>Mechanistic Mutation-Aware</strong> scoring by default —
+        a model trained to notice when a mutation lands on a residue the enzyme actually
+        needs to work, not just how different the mutant looks from the original sequence.
+      </p>
+    </section>
+
+    <section class="section" id="evolution">
+      <div class="section-head">
+        <span class="mono-label">From classifier to calibrated ranges</span>
+        <h2>Evolution of this work</h2>
+        <p>Two model generations, built to make mutation effects on enzyme kinetics visible to machine learning.</p>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item milestone-data">
+          <span class="tag">Foundation</span>
+          <h3>CatLog / KinHub-27k: a curated kinetics dataset</h3>
+          <p>
+            Wild type, mutant, and synthetically inactive sequence–substrate pairs, checked
+            against UniProt/PDB annotations, form the shared experimental backbone both
+            models below are trained on. Explore the dataset itself in
+            <a href="https://chowdhurylab.github.io/tools/catlog-latest.html" target="_blank" rel="noopener">CatLog</a>.
+          </p>
+        </div>
+
+        <div class="timeline-item milestone-realkcat">
+          <span class="tag">2025 preprint &middot; RealKcat</span>
+          <h3>Step 1: teaching a classifier what "broken" looks like</h3>
+          <p>
+            The earlier model, RealKcat, only had to answer yes/no: is this enzyme
+            active? To make it notice mutations that matter — not just any sequence
+            change — the team took real enzyme sequences and swapped out their known
+            catalytic residues (the exact amino acids that do the chemistry) for alanine,
+            a small, chemically inert amino acid. These "switched-off" variants were
+            labeled a new <strong>"Cluster 0"</strong> while keeping their real
+            experimental K<sub>M</sub> values.
+          </p>
+          <div class="stat-row">
+            <span class="stat-pill"><b>~5,000</b> initial switched-off variants</span>
+            <span class="stat-pill">expanded to <b>~17,000</b> using InterPro annotations</span>
+          </div>
+          <p>
+            <a href="https://doi.org/10.1101/2025.02.10.637555" target="_blank" rel="noopener">Read the RealKcat preprint (bioRxiv, Feb 2025)</a> &middot;
+            <a href="https://github.com/TKAI-LAB-Mali/CatRange" target="_blank" rel="noopener">RealKcat codebase</a>
+          </p>
+        </div>
+
+        <div class="timeline-item milestone-catrange">
+          <span class="tag">2026 &middot; Published in PNAS Nexus &middot; CatRange</span>
+          <h3>Step 2: from "is it broken?" to calibrated kinetic ranges</h3>
+          <p>
+            CatRange goes further than a simple on/off label. Swapping a catalytic
+            residue for alanine doesn't always kill activity completely — it depends on
+            the enzyme, the residue, and the substrate. So the team added
+            <strong>5,278</strong> of these catalytic-site alanine variants to the
+            training data, and instead of guessing their effect, calibrated it using
+            <strong>22</strong> real published wild-type-vs-mutant measurements as
+            anchors. Those 22 anchor pairs were kept separate from model training and
+            were at most 60% similar to anything the model trained on, so the model
+            couldn't just memorize the answer. Some of those real mutations mostly
+            slowed the enzyme down, some mostly changed how much substrate it needed,
+            and some barely changed anything — CatRange had to learn to tell these
+            apart instead of assuming every catalytic mutation acts the same way.
+          </p>
+          <div class="stat-row">
+            <span class="stat-pill"><b>5,278</b> calibrated catalytic-site variants</span>
+            <span class="stat-pill"><b>22</b> real anchor measurements for calibration</span>
+            <span class="stat-pill">&le;<b>60%</b> similarity cutoff (no memorizing)</span>
+          </div>
+          <p>
+            <a href="https://doi.org/10.1093/pnasnexus/pgag309" target="_blank" rel="noopener">Read the CatRange paper (PNAS Nexus)</a> &middot;
+            <a href="https://github.com/ssbio/CatRange" target="_blank" rel="noopener">CatRange codebase</a>
+          </p>
+
+          <figure class="evidence-figure">
+            <img src="assets/figures/mutation-calibration.png" alt="Four-panel benchmark comparing predicted vs. experimental kcat and KM for wild-type and catalytic-alanine mutant enzymes across CatRange and retrained comparator models." loading="lazy" />
+            <figcaption>
+              <strong>What this buys in practice (panels B and D):</strong> for real
+              catalytic-residue-to-alanine mutants such as <strong>P17516</strong>,
+              <strong>Q91WR5</strong>, and <strong>Q6FFQ0</strong>, CatRange (blue)
+              correctly predicts the big drop in k<sub>cat</sub> and shift in
+              K<sub>M</sub> — mutation effects that comparator models trained without
+              this calibrated signal miss entirely.
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="timeline-item milestone-today">
+          <span class="tag">Today</span>
+          <h3>What you actually run</h3>
+          <p>
+            That calibrated model is what runs by default — as
+            <strong>Mechanistic Mutation-Aware</strong> mode — in both the Colab
+            notebook and the lab's hosted queue, across all four input modes above.
+            You don't need to do anything special to use it; it's simply the default.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>&copy; 2026 &middot; A collaboration of Iowa State University, University of Nebraska–Lincoln &amp; University of South Florida</p>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="team.html">Team &amp; Citation</a>
+        <a href="https://github.com/ssbio/CatRange" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

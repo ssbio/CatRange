@@ -252,5 +252,13 @@ codebase, **RealKcat**, is maintained separately at
 
 Please cite the CatRange manuscript when using this code or data:
 
-> **CatRange: predicting enzyme kinetic parameter ranges.**
-> *PNAS Nexus*. doi: [10.1093/pnasnexus/pgag309](https://doi.org/10.1093/pnasnexus/pgag309).
+> Sajeevan KA, Osinuga A, Arunraj B, Ferdous S, Shahreen N, Noor MS, Koneru S,
+> Santos-Correa LM, Salehi R, Chowdhury NB, Aryee R, Calderon-Lopez B, Dey S,
+> Mali A, Saha R, Chowdhury R. **CatRange enables robust prediction of enzyme
+> variant kinetic regimes.** *PNAS Nexus*. 2026;pgag309. doi:
+> [10.1093/pnasnexus/pgag309](https://doi.org/10.1093/pnasnexus/pgag309).
+
+CatRange is a collaboration across three university labs: the
+[Chowdhury Lab](https://chowdhurylab.github.io/) (Iowa State University), the
+[SSB Lab](https://sahassbio.com/) (University of Nebraska–Lincoln), and the
+[TKAI Lab](https://tkai-lab-mali.github.io/) (University of South Florida).
