@@ -60,10 +60,10 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/TKAI-LAB-Mali/CatRange"
-Documentation = "https://github.com/TKAI-LAB-Mali/CatRange"
-Repository = "https://github.com/TKAI-LAB-Mali/CatRange.git"
-Issues = "https://github.com/TKAI-LAB-Mali/CatRange/issues"
+Homepage = "https://github.com/ssbio/CatRange"
+Documentation = "https://github.com/ssbio/CatRange"
+Repository = "https://github.com/ssbio/CatRange.git"
+Issues = "https://github.com/ssbio/CatRange/issues"
 
 [project.scripts]
 catrange-train = "scripts.cv_train:main"

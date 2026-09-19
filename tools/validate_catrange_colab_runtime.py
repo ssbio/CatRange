@@ -166,7 +166,8 @@ def validate(notebook_path: Path, bash_path: Path | None) -> list[str]:
     if bash_path is not None:
         with tempfile.TemporaryDirectory(prefix="catrange-colab-") as temp_dir:
             pipeline_path = Path(temp_dir) / "pipeline.sh"
-            pipeline_path.write_text(pipeline, encoding="utf-8", newline="\n")
+            with pipeline_path.open("w", encoding="utf-8", newline="\n") as stream:
+                stream.write(pipeline)
             result = subprocess.run(
                 [str(bash_path), "-n", str(pipeline_path)],
                 text=True,

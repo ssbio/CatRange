@@ -581,7 +581,11 @@ def load_screen_input(args: argparse.Namespace):
 
     if args.input_csv:
         input_csv = Path(args.input_csv).expanduser().resolve()
-        df = pd.read_csv(input_csv)
+        # Sequence/SMILES and identifiers are text, not NA markers or numbers.
+        # Keep normal pandas inference for CLEAN booleans and confidence values.
+        df = pd.read_csv(input_csv, converters={
+            column: str for column in ("sequence", "Isomeric SMILES", "smiles", "sequence_id", "substrate_id")
+        })
         if args.sequence_column not in df.columns:
             raise ValueError(
                 f"Sequence column '{args.sequence_column}' was not found in {input_csv}. "
@@ -805,8 +809,9 @@ def merge_catrange_results(args: argparse.Namespace) -> None:
     output_csv = Path(args.output_csv).expanduser().resolve()
     output_csv.parent.mkdir(parents=True, exist_ok=True)
 
-    screened_df = pd.read_csv(screened_csv)
-    catrange_df = pd.read_csv(catrange_output_csv)
+    text_columns = {column: str for column in ("sequence", "Isomeric SMILES", "smiles", "sequence_id", "substrate_id")}
+    screened_df = pd.read_csv(screened_csv, converters=text_columns)
+    catrange_df = pd.read_csv(catrange_output_csv, converters=text_columns)
 
     if "clean_row_id" not in screened_df.columns:
         raise ValueError(f"{screened_csv} is missing clean_row_id.")

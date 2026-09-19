@@ -15,11 +15,11 @@ setup(
     description="Mutation-aware kinetic range prediction for enzymes using CatRange",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/TKAI-LAB-Mali/CatRange",
+    url="https://github.com/ssbio/CatRange",
     project_urls={
-        "Bug Tracker": "https://github.com/TKAI-LAB-Mali/CatRange/issues",
-        "Documentation": "https://github.com/TKAI-LAB-Mali/CatRange",
-        "Source Code": "https://github.com/TKAI-LAB-Mali/CatRange",
+        "Bug Tracker": "https://github.com/ssbio/CatRange/issues",
+        "Documentation": "https://github.com/ssbio/CatRange",
+        "Source Code": "https://github.com/ssbio/CatRange",
     },
     packages=find_packages(),
     classifiers=[

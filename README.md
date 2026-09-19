@@ -1,220 +1,178 @@
 # CatRange
 
-CatRange predicts useful **ranges** for two enzyme kinetic parameters:
+CatRange predicts kinetic **ranges** for enzyme–substrate pairs: catalytic turnover
+(k<sub>cat</sub>, s⁻¹) and the Michaelis constant (K<sub>M</sub>, M). Inputs are a
+protein sequence and substrate SMILES. The inference pipeline validates each row,
+uses [CLEAN](https://github.com/tttianhao/CLEAN) to screen the protein sequence,
+and predicts kinetics for eligible rows. Skipped rows remain in the output.
 
-- **k<sub>cat</sub>** — how quickly an enzyme converts substrate to product
-- **K<sub>M</sub>** — the substrate concentration associated with half-maximal reaction speed
+This repository contains the inference notebook, research code, curated data,
+and saved evaluation outputs. You can also use the
+[CatRange website](https://catrange.sahassbio.com).
 
-You provide a protein sequence and a substrate SMILES string. The pipeline first uses
-[CLEAN](https://github.com/tttianhao/CLEAN) to check whether the sequence is enzyme-like,
-then runs CatRange only for rows that pass that screen.
+## Run in Google Colab
 
-<h2 align="center">Run CatRange in Google Colab</h2>
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb)
 
-<p align="center">
-  <a href="https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb">
-    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open CatRange in Google Colab" height="42">
-  </a>
-</p>
+1. Open the notebook and sign in to Google if requested.
+2. Select **Demo**, **Interactive**, **Bulk**, or **Bulk-large** in the first setup cell.
+3. Keep **Mechanistic Mutation-Aware (default)** for the current ESM-C pathway;
+   the notebook also exposes a legacy binary pathway for comparison.
+4. Run the cells in order, review the results, and download `inference_results.csv`.
 
-<p align="center"><strong>RECOMMENDED FOR MOST USERS</strong><br><strong>No installation or coding required</strong></p>
+The notebook creates its runtimes and downloads dependencies and pretrained files.
+Initial setup needs internet access; downloaded files can be reused while that
+runtime persists. Runtime availability and duration depend on Colab.
 
-> **Model weights:** CatRange downloads its model weights automatically from
-> [Hugging Face](https://huggingface.co/ssbio/CatRange). The model weights are
-> not stored in this Git repository.
+## Run locally
 
-## Google Colab: Quick Start
-
-1. Click the **Open in Colab** badge above.
-2. Sign in to Google if asked.
-3. In Colab, choose **Runtime → Run all**.
-4. Keep **Demo** selected for your first run.
-5. Review the results table and download `inference_results.csv`.
-
-The notebook installs its own compatible software versions. The first run takes longer
-because it downloads the models; later runs in the same runtime reuse those files.
-
-## Choose How You Want to Run CatRange
-
-| Method | Best for | Setup level |
-| --- | --- | --- |
-| [Google Colab](#method-1-google-colab-recommended) | First-time users, classes, and quick tests | None |
-| [Local Jupyter notebook](#method-2-local-jupyter-notebook) | Working on your own Linux/WSL computer | Basic |
-| [Source-code command](#method-3-source-code-command) | Automation, scripts, and advanced use | Advanced |
-
-## What You Need
-
-Each input row needs two columns:
-
-| Column | What to enter | Example |
-| --- | --- | --- |
-| `sequence` | A protein amino-acid sequence using one-letter codes | `MKT...` |
-| `Isomeric SMILES` | The substrate's isomeric SMILES string | `CCO` |
-
-You can start with [`inference/examples/demo_pairs.csv`](inference/examples/demo_pairs.csv).
-
-Supported input sizes:
-
-- Protein sequence: 9–1022 amino acids
-- Isomeric SMILES: 2–512 characters
-
-## How to Run Inference
-
-### Method 1: Google Colab (recommended)
-
-Use this method if you want the simplest experience.
-
-1. Open the [CatRange inference notebook in Colab](https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb).
-2. Choose an input mode:
-   - **Demo** uses included example data.
-   - **Interactive** asks for one or more sequence/SMILES pairs.
-   - **Bulk** uploads a CSV.
-   - **Bulk-large** processes a larger CSV in batches.
-3. Keep **Mechanistic Mutation-Aware** selected unless you are reproducing an older benchmark.
-4. Run the cells from top to bottom.
-5. Download `inference_results.csv` from the final cell.
-
-Colab automatically performs these steps:
-
-1. Checks the input format and length limits.
-2. Runs the CLEAN enzyme screen.
-3. Predicts k<sub>cat</sub> and K<sub>M</sub> ranges for enzyme-like rows.
-4. Combines everything into one results table.
-
-### Method 2: Local Jupyter notebook
-
-Use this method to run the same guided interface on your own computer. The local
-workflow currently requires Linux or Windows Subsystem for Linux (WSL). A GPU is
-helpful but not required.
-
-> The notebook runs locally, but the first setup still needs internet access to download
-> software and model files. Cached files can be reused for later runs.
-
-1. Install Git, Python 3, and Jupyter.
-2. Clone the repository:
-
-   ```bash
-   git clone https://github.com/ssbio/CatRange.git
-   cd CatRange
-   ```
-
-3. Install the lightweight notebook launcher requirements:
-
-   ```bash
-   python3 -m pip install jupyter pandas
-   ```
-
-4. Open the provided notebook:
-
-   ```bash
-   jupyter lab CatRange_Inference_Interface.ipynb
-   ```
-
-5. Choose **Demo** for a first run, then run the cells from top to bottom.
-
-The notebook creates isolated runtimes for CLEAN and CatRange, which prevents their
-machine-learning dependencies from interfering with each other.
-
-### Method 3: Source-code command
-
-Use this method for repeatable scripts or batch jobs. It currently requires Linux or
-WSL and Python 3.12.
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/ssbio/CatRange.git
-   cd CatRange
-   ```
-
-2. Create an environment and install the source inference requirements:
-
-   ```bash
-   python3.12 -m venv .venv
-   source .venv/bin/activate
-   python -m pip install --upgrade pip
-   python -m pip install -r inference/requirements.txt
-   ```
-
-3. Run the demo CSV:
-
-   ```bash
-   python inference/catrange_inference.py \
-     --input inference/examples/demo_pairs.csv \
-     --output inference_results.csv
-   ```
-
-That single command runs **input validation → CLEAN → CatRange → merged results**.
-There is no separate cleaning command to remember. The CLEAN environment, source, and
-pretrained files are downloaded automatically on the first run and cached in
-`.clean_runtime/`. CatRange model weights are downloaded from
-[Hugging Face](https://huggingface.co/ssbio/CatRange), not from this Git repository.
-
-For all command options:
+Clone the repository on Linux or WSL:
 
 ```bash
-python inference/catrange_inference.py --help
+git clone https://github.com/ssbio/CatRange.git
+cd CatRange
 ```
 
-## Understanding the Results
+For the guided notebook, install JupyterLab and pandas, then open
+[CatRange_Inference_Interface.ipynb](CatRange_Inference_Interface.ipynb):
 
-The Colab notebook uses friendly column names; the source command uses compact
-machine-friendly names.
+```bash
+python3 -m pip install jupyterlab pandas
+jupyter lab CatRange_Inference_Interface.ipynb
+```
 
-| Colab column | Source column | Meaning |
+Install Git, curl, and unzip before running the notebook locally. Its setup creates
+separate CLEAN and CatRange runtimes. A GPU is optional; model files and software
+still need to be downloaded on first use.
+
+For a scriptable CSV workflow, create a Python 3.12 environment:
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r inference/requirements.txt
+python inference/catrange_inference.py \
+  --input inference/examples/demo_pairs.csv \
+  --output inference_results.csv
+```
+
+The command runs **input validation → CLEAN → CatRange → merged results**.
+Use `--device cpu` or `--device cuda` to select a device; the default is `auto`.
+Run `python inference/catrange_inference.py --help` for other options.
+
+CatRange weights are downloaded from [Hugging Face](https://huggingface.co/ssbio/CatRange)
+as documented in the [model manifest](inference/model_manifest.json); the large
+classifier files are not included in Git. CLEAN software and pretrained files
+are cached in `.clean_runtime/` by default. See the
+[model-file notes](inference/models/README.md).
+
+## Inputs and demos
+
+| Required column | Contents | Supported length |
 | --- | --- | --- |
-| `Predicted EC number` | `clean_top_ec_number` | CLEAN's most likely EC number |
-| `clean_top_confidence` | `clean_top_confidence` | CLEAN's confidence score for its top EC prediction |
-| `Classified as enzyme?` | `clean_is_enzyme` | Whether the row passed the CLEAN enzyme screen |
-| `Pipeline note` | `catrange_status` | Whether CatRange predicted the row or why it was skipped |
-| `Predicted kcat range (s^-1)` | `kcat_pred_range` | Predicted k<sub>cat</sub> range |
-| `Predicted KM range (M)` | `km_pred_range` | Predicted K<sub>M</sub> range |
+| `sequence` | Protein sequence in one-letter amino-acid codes | 9–1022 amino acids |
+| `Isomeric SMILES` | Substrate SMILES | 2–512 characters |
 
-The CLEAN confidence is a model score, not an experimental measurement. CatRange
-reports ranges because enzyme measurements can vary substantially with experimental
-conditions.
+The supplied demos have different purposes:
 
-## For Researchers and Developers
+| Input | Rows | Purpose |
+| --- | --- | --- |
+| Notebook **Demo** | Two example pairs plus two deliberately invalid inputs | Demonstrate screening, prediction eligibility, and length validation |
+| [demo_validation_pairs.csv](inference/examples/demo_validation_pairs.csv) | The same four input pairs as notebook Demo | Exercise those inputs through the source CLI |
+| [demo_pairs.csv](inference/examples/demo_pairs.csv) | P17516 WT/Y55A and Q6FFQ0 WT/E264A+C301A | Compare WT and generated catalytic-alanine benchmark controls |
 
-CatRange combines ESM-C protein embeddings, ChemBERTa substrate embeddings, and
-XGBoost classification. The CatLog curated enzyme-kinetics data support model training,
-benchmarking, and manuscript analyses.
+The generated variants do not establish experimentally measured mutant kinetics
+or guarantee a predicted reduction. See [demo provenance](inference/examples/demo_provenance.json)
+for source workbooks, mutation positions, and fixture hashes.
 
-### Repository layout
+The notebook and CLI are separate implementations: the notebook includes mode
+selection, a legacy binary pathway, batching controls, and friendly output labels;
+the source CLI uses its released CatRange models and compact column names.
+Identical demo input rows alone do not establish identical outputs across paths.
 
-```text
-CatRange_Inference_Interface.ipynb  Guided Colab/local inference notebook
-inference/                          End-to-end source inference and model files
-catrange_model/                     CatRange training and evaluation code
-data/                               CatLog/CatRange data and metadata
-results/                            CatRange and comparator benchmark outputs
-benchmarks/retrained_comparators/   Comparator retraining scripts
-ablation/                           Feature-ablation scripts and results
-figures/                            Figure source and output files
-manuscript/                         Manuscript and supporting information
-envs/                               Reproducible environment definitions
-```
+## Read the results
 
-### Train CatRange
+| Source column | Meaning |
+| --- | --- |
+| `clean_top_ec_number` | CLEAN's top EC assignment |
+| `clean_top_confidence` | CLEAN score used by the screening rule |
+| `clean_is_enzyme` | Whether the input passed that rule |
+| `catrange_status` | Prediction status or skip reason |
+| `kcat_pred_range`, `km_pred_range` | Predicted ranges, including s⁻¹ or M units |
+| `kcat_confidence`, `km_confidence` | Predicted-bin model probabilities |
 
-Create the research environments:
+The notebook presents corresponding friendly column names. CLEAN screening and
+model scores are computational estimates, not experimental measurements of
+enzyme function or catalytic activity. Bin widths are not uniformly one decade;
+the neighboring-bin guide is not a confidence interval.
+
+## Research and reproducibility
+
+| Directory | Included material |
+| --- | --- |
+| [inference](inference/) | Source inference, example inputs, and model manifest |
+| [catrange_model](catrange_model/README.md) | Configured training and evaluation from precomputed features |
+| [data](data/catrange_metadata/README.md) | CatLog source/curated tables and partition metadata |
+| [results](results/) | Saved CatRange and comparator outputs |
+| [benchmarks/retrained_comparators](benchmarks/retrained_comparators/README.md) | Comparator input preparation, training/inference runners, and evaluation |
+| [ablation](ablation/README.md) | Feature-ablation scripts and saved results |
+| [envs](envs/README.md) | Research environment definitions and inference runtime pins |
+
+To create the research environments, run from the repository root:
 
 ```bash
 bash scripts/env/create_conda_envs.sh all
 ```
 
-Run a manuscript configuration:
+Training requires the processed feature tensors expected by the data loader;
+**those tensors are not included in this source/data export**. After supplying
+them, set `CATRANGE_DATA_ROOT` to that tensor root; the YAML `data.root_dir` and
+`dataset_version` fields are not loader overrides. A training invocation is:
 
 ```bash
+conda activate catrange-notebooks-gpu
+export CATRANGE_DATA_ROOT=/path/to/data_robust_v1
 cd catrange_model
-python3 -m pip install --no-deps -e .
+python -m pip install --no-deps -e .
 PYTHONPATH=. python scripts/cv_train.py --config configs/kcat_esmc.yaml --device cuda
 ```
 
-See [`envs/README.md`](envs/README.md) and
-[`catrange_model/README.md`](catrange_model/README.md) for training, benchmarking, and
-reproducibility details.
+Use the same inputs, partitions, configuration, model files, and dependency
+versions when comparing reruns. Saved manifests and metrics provide provenance;
+fixed seeds alone do not guarantee bitwise equality across hardware or versions.
+The [data inventory](data/catrange_metadata/DATA_DIRECTORY.md) distinguishes
+included artifacts from prerequisites for a full retraining run. The
+[tabular release manifest](data/RELEASE_TABULAR_MANIFEST.json) records readability,
+structure, and file hashes for the exported CSV/workbook files. Run
+`python tools/check_public_release.py` for the included source-release checks.
+
+
+## Evolution of This Work
+
+CatRange's range-prediction approach builds on an earlier binary-classification model
+for enzyme kinetics developed by the same collaborating labs. That predecessor
+codebase, **RealKcat**, is maintained separately at
+[TKAI-LAB-Mali/CatRange](https://github.com/TKAI-LAB-Mali/CatRange):
+
+> Anna Sajeevan K, Osinuga A, B A, Ferdous S, Shahreen N, Noor MS, Koneru S,
+> Santos-Correa LM, Salehi R, Chowdhury NB, Calderon-Lopez B, Mali A, Saha R,
+> Chowdhury R. **Robust Prediction of Enzyme Variant Kinetic Ranges with RealKcat.**
+> *bioRxiv* [Preprint]. 2025 Feb 15. doi:
+> [10.1101/2025.02.10.637555](https://www.biorxiv.org/content/10.1101/2025.02.10.637555v1).
+> PMID: 39990461 · PMCID: PMC11844551.
 
 ## Citation
 
-Please cite the CatRange manuscript when using this code or data.
+Please cite the CatRange manuscript when using this code or data:
+
+> Sajeevan KA, Osinuga A, Arunraj B, Ferdous S, Shahreen N, Noor MS, Koneru S,
+> Santos-Correa LM, Salehi R, Chowdhury NB, Aryee R, Calderon-Lopez B, Dey S,
+> Mali A, Saha R, Chowdhury R. **CatRange enables robust prediction of enzyme
+> variant kinetic regimes.** *PNAS Nexus*. 2026;pgag309. doi:
+> [10.1093/pnasnexus/pgag309](https://doi.org/10.1093/pnasnexus/pgag309).
+
+CatRange is a collaboration across three university labs: the
+[Chowdhury Lab](https://chowdhurylab.github.io/) (Iowa State University), the
+[SSBio Lab](https://sahassbio.com/) (University of Nebraska–Lincoln), and the
+[TKAI Lab](https://tkai-lab-mali.github.io/) (University of South Florida).

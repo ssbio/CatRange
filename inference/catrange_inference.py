@@ -21,6 +21,8 @@ BIN_EDGES = {
     "kcat": (0, 1e-8, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e8),
     "km": (1e-14, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e4),
 }
+BIN_UNITS = {"kcat": "s^-1", "km": "M"}
+KINETIC_BINS_VERSION = "catrange-kinetic-bins-v1"
 
 MIN_SEQUENCE_LENGTH = 9
 MAX_SEQUENCE_LENGTH = 1022
@@ -75,7 +77,7 @@ def _bin_labels(parameter: str) -> list[str]:
     edges = BIN_EDGES[parameter]
     labels = []
     for low, high in zip(edges[:-1], edges[1:]):
-        unit = "s^-1" if parameter == "kcat" else "M"
+        unit = BIN_UNITS[parameter]
         labels.append(f"{low:g} to {high:g} {unit}")
     return labels
 
@@ -307,7 +309,11 @@ def load_inference_input(input_csv: str | Path):
     if not input_path.exists():
         raise FileNotFoundError(f"Input CSV not found: {input_path}")
 
-    frame = pd.read_csv(input_path)
+    # Keep sequence/SMILES and optional identifiers (including leading zeros
+    # and literal "NA") textual; infer types normally for scientific outputs.
+    frame = pd.read_csv(input_path, converters={
+        column: str for column in ("sequence", "Isomeric SMILES", "smiles", "sequence_id", "substrate_id")
+    })
     if frame.empty:
         raise ValueError("The input CSV has no data rows.")
     if "sequence" not in frame.columns:
@@ -464,7 +470,9 @@ def run_inference_pipeline(
                 clean_repo_dir=clean_repo_dir,
                 verbose=verbose,
             )
-            screened_valid = pd.read_csv(screened_path)
+            screened_valid = pd.read_csv(screened_path, converters={
+                column: str for column in ("sequence", "Isomeric SMILES", "smiles", "sequence_id", "substrate_id")
+            })
             invalid_input = input_frame[
                 input_frame["input_status"] != "ready"
             ].copy()

@@ -4,7 +4,9 @@ This folder is a standalone workspace for benchmarking **CatPred**, **DLKcat**,
 **UniKP**, and **EITLEM-Kinetics** against the same binning and classification
 metrics used by **CatRange**.
 
-It does **not** modify anything inside the legacy local `CatRange/` source tree.
+Commands below run from `benchmarks/retrained_comparators/`. The comparator
+implementations, their dependencies, and pretrained checkpoints must be supplied
+separately; the public export includes runners and saved results.
 
 ## What This Workspace Does
 
@@ -25,8 +27,8 @@ It does **not** modify anything inside the legacy local `CatRange/` source tree.
 - `kcat`: `[0, 1e-8, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e8]`
 - `km`: `[1e-14, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e4]`
 
-These are copied into this workspace so benchmarking stays independent of
-the legacy local `CatRange/` source tree.
+These boundaries are recorded in [benchmark_constants.py](benchmark_constants.py).
+kcat is evaluated in s⁻¹ and KM in M.
 
 ## Install
 
@@ -36,47 +38,36 @@ Use any Python environment with:
 python3 -m pip install -r requirements.txt
 ```
 
-If you want to drive the full workflow from Jupyter, open:
+The reusable orchestration helpers are in [notebook_pipeline.py](notebook_pipeline.py).
+This export does not include the older `CatRange_CatPred_DLKcat_Benchmark.ipynb`;
+use the command-line steps below and inspect each runner's `--help` for its
+model repository, interpreter, checkpoint, cache, and output arguments.
 
-- `CatRange_CatPred_DLKcat_Benchmark.ipynb`
+Use separate model-compatible environments for CatRange, CatPred, DLKcat,
+UniKP, EITLEM, and any embedding-generation step. The holdout runners accept
+`--suite-dir` (or `CATRANGE_BENCHMARK_SUITE`); the CatPred holdout runner also
+accepts `--repo-root`, `--checkpoint-dir`, and `--cache-dir`. Local environment paths from
+historical manifests are provenance, not portable defaults.
 
-That notebook wraps the suite builder, CatRange/CatPred/DLKcat/UniKP/EITLEM
-prediction runs, evaluation, and single-panel figure export into one place.
-Edit the configuration cell near the top, then run the notebook from top to
-bottom.
-
-The benchmark orchestrator expects model-specific environments:
-
-- `PY_REALKCAT` for CatRange inference, evaluation, and plotting
-- `PY_CATPRED` for CatPred inference
-- `PY_DLKCAT` for DLKcat inference
-- `PY_UNIKP` for UniKP feature extraction and training
-- `PY_EITLEM` for EITLEM feature extraction and training
-- `PY_ESM` for CatPred ESM2 record generation
-
-The default notebook config now targets these local prefixes under `$WORK/envs`:
-
-- `/work/ssbio/aosinuga2/envs/CatRange_env_gpu`
-- `/work/ssbio/aosinuga2/envs/catpred_model`
-- `/work/ssbio/aosinuga2/envs/dlkcat_model`
-- `/work/ssbio/aosinuga2/envs/unikp_model`
-- `/work/ssbio/aosinuga2/envs/eitlem_model`
-
-`PY_ESM` defaults to the same Python executable as `PY_CATPRED`.
-
-On this machine those local prefixes can be lightweight symlinks to known-good
-shared envs rather than full duplicated installs.
+Saved reference results are available under
+[runs/manuscript_kcat_suite](runs/manuscript_kcat_suite/), including its
+[suite manifest](runs/manuscript_kcat_suite/suite_manifest.csv) and
+[summary outputs](runs/manuscript_kcat_suite/suite_results/). Preserve these when
+running a new comparison.
 
 ## Recommended Workflow
 
 ### Use CatRange’s Exact Fold Partitions
 
-If you want the benchmark inputs to come directly from the exact CatRange fold
-workbooks you used in training, use:
+The importer needs the expanded processed-partition tree described in the
+[data inventory](../../data/catrange_metadata/DATA_DIRECTORY.md#exact-comparator-partitions).
+That tree is not included in this export. Once you have supplied it, replace
+`/path/to/research-data-root` below with the directory containing `data/processed`
+and `data/raw`:
 
 ```bash
 python3 import_realkcat_partitions.py \
-  --realkcat-root /work/ssbio/aosinuga2/Python_work/CatRange \
+  --realkcat-root /path/to/research-data-root \
   --parameter kcat \
   --fold 5 \
   --output-dir runs/realkcat_fold5_kcat
@@ -84,7 +75,7 @@ python3 import_realkcat_partitions.py \
 
 For the primary CatRange publication-style setup, this is the closest match:
 
-- `configs/kcat_esmc.yaml` for parameter and embedding
+- [kcat_esmc.yaml](../../catrange_model/configs/kcat_esmc.yaml) for parameter and embedding
 - `--fold 5`, because `realkcat-train` defaults to `--final-fold 5`
 - `--split test` during evaluation if you want a clean held-out comparison
 
@@ -92,7 +83,7 @@ That means the most direct benchmark path for CatPred vs DLKcat is:
 
 ```bash
 python3 import_realkcat_partitions.py \
-  --realkcat-root /work/ssbio/aosinuga2/Python_work/CatRange \
+  --realkcat-root /path/to/research-data-root \
   --parameter kcat \
   --fold 5 \
   --output-dir runs/realkcat_kcat_esmc_fold5
@@ -156,8 +147,8 @@ This writes:
 
 ### 3. Run the model predictions
 
-The notebook wrapper can launch all supported models directly. If you prefer to
-run them yourself, the benchmark runners are:
+After installing the relevant external model and its compatible environment,
+use these runners with explicit local paths:
 
 - `run_catpred_suite.py`
 - `run_catpred_retrain_suite.py`

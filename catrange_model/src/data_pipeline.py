@@ -9,6 +9,7 @@ Handles:
 - Holdout set creation
 """
 
+import os
 import torch
 import numpy as np
 from pathlib import Path
@@ -24,7 +25,7 @@ except ImportError:
 # ── Local constants (no config.py dependency) ────────────────────────────────
 _GLOBAL_SEED = 42
 _CLAMP_MIN = 1e-7
-_DATA_ROOT = Path("data_robust_v1")
+_DATA_ROOT = Path(os.environ.get("CATRANGE_DATA_ROOT", "data_robust_v1")).expanduser()
 _DATASET_ESMC = "data_split_curated_no_OOD_nodups_esmc"
 _DATASET_ESM2 = "data_split_curated_no_OOD_nodups"
 

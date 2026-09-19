@@ -1,0 +1,94 @@
+{
+  "format_version": "catrange-demo-provenance-v1",
+  "benchmark_demo": {
+    "fixture": "demo_pairs.csv",
+    "source": "data/raw/OOD_Neg_hold_test_set.xlsx",
+    "source_sha256": "703b9dc12eefe65b08ad65ca382144781f3aa1d466f1210a874fb32bf0e04b07",
+    "crosscheck_source": "data/raw/WT_uniprot_info_1.xlsx",
+    "crosscheck_source_sha256": "de4a0891a671d6018b06318ba5206b683c4bdbdaa7d240d7fcb9d6226df7beb4",
+    "pairs": [
+      {
+        "uniprot_id": "P17516",
+        "source_sheet": "kcat",
+        "source_excel_row": 2,
+        "source_index": 0,
+        "corroborating_sheets": [
+          "km",
+          "test"
+        ],
+        "crosscheck_sheet": "Sheet1",
+        "crosscheck_excel_row": 20,
+        "sequence_length": 323,
+        "substrate": "3alpha-hydroxy-5beta-pregnane-20-one",
+        "mutations": [
+          {
+            "position": 55,
+            "wild_type": "Y",
+            "variant": "A"
+          }
+        ]
+      },
+      {
+        "uniprot_id": "Q6FFQ0",
+        "source_sheet": "kcat",
+        "source_excel_row": 4,
+        "source_index": 2,
+        "corroborating_sheets": [
+          "km",
+          "test"
+        ],
+        "crosscheck_sheet": "Sheet1",
+        "crosscheck_excel_row": 265,
+        "sequence_length": 526,
+        "substrate": "succinate semialdehyde",
+        "mutations": [
+          {
+            "position": 264,
+            "wild_type": "E",
+            "variant": "A"
+          },
+          {
+            "position": 301,
+            "wild_type": "C",
+            "variant": "A"
+          }
+        ]
+      }
+    ],
+    "note": "Stored wild-type and catalytic-alanine benchmark sequence pairs, with unchanged per-enzyme substrate. Variants are generated benchmark controls; this fixture does not establish experimentally measured mutant kinetics or guarantee a predicted reduction. CLEAN screening and model output determine the reported results."
+  },
+  "validation_demo": {
+    "fixture": "demo_validation_pairs.csv",
+    "source": "CatRange_Inference_Interface.ipynb",
+    "source_sha256": "b856330108b56d12de38d518134bad7d7093e2b4539972029faff74479275e71",
+    "source_cell_index": 2,
+    "source_branch": "mode == Demo",
+    "rows": [
+      {
+        "sample_id": "notebook_example_1",
+        "sequence_length": 312,
+        "smiles_length": 20
+      },
+      {
+        "sample_id": "notebook_example_2",
+        "sequence_length": 359,
+        "smiles_length": 24
+      },
+      {
+        "sample_id": "validation_sequence_too_long",
+        "sequence_length": 1023,
+        "smiles_length": 6
+      },
+      {
+        "sample_id": "validation_short_sequence_long_smiles",
+        "sequence_length": 6,
+        "smiles_length": 513
+      }
+    ],
+    "note": "Exact four notebook demo pairs: first two pass length limits; rows three and four exercise rejection reporting. CLEAN determines whether length-valid rows receive kinetic predictions."
+  },
+  "fixtures": {
+    "demo_pairs.csv": "152e0699a22d187c51e092974aec18a3f1fdc530ffc5a0c6f24e3b7da13d92c8",
+    "demo_validation_pairs.csv": "6cd4063eef7f6f514a0ad4a8312f9f2f71925db463eb3e521975bb7b7e96f19c"
+  }
+}

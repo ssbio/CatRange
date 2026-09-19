@@ -2,8 +2,9 @@
 """
 Run the CatPred retrained fold-5 model on the negative-holdout examples.
 
-This script must be run using the catpred_model conda environment:
-    /work/ssbio/aosinuga2/envs/catpred_model/bin/python run_catpred_holdout.py \
+Run this script using an activated CatPred-compatible environment:
+    python run_catpred_holdout.py --repo-root /path/to/CatPred \
+        --suite-dir /path/to/retrained-suite \
         --holdout-csv <path> --out-csv <path> --parameter kcat
 
 It will:
@@ -17,6 +18,7 @@ import gzip
 import hashlib
 import json
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -24,16 +26,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-SUITE_DIR = Path(
-    "/work/ssbio/aosinuga2/Python_work/EnzymeKinetics_Manuscript_Benchmark"
-    "/runs/manuscript_kcat_suite_retrained_same_split"
-).resolve()
+SUITE_DIR = Path(os.environ.get("CATRANGE_BENCHMARK_SUITE",
+    str(Path(__file__).resolve().parent / "runs/manuscript_kcat_suite_retrained_same_split"))).expanduser().resolve()
 CATPRED_CHECKPOINT = (
     SUITE_DIR / "catpred_retrained" / "fold5" / "checkpoints" / "fold_0" / "model_0"
 ).resolve()
 CATPRED_CACHE_DIR = (SUITE_DIR / "catpred_esm2_cache").resolve()
 
-CATPRED_ROOT = Path("/work/ssbio/aosinuga2/Python_work/CatPred").resolve()
+CATPRED_ROOT = Path(os.environ.get("CATPRED_ROOT",
+    str(Path(__file__).resolve().parents[3] / "CatPred"))).expanduser().resolve()
 ESM_MAX_LENGTH = 1024
 
 
@@ -156,16 +157,38 @@ def _standardize_catpred_output(raw_df: pd.DataFrame, parameter: str) -> pd.Data
     return pd.DataFrame(out_rows)
 
 
-def main():
+def parse_args():
     parser = argparse.ArgumentParser(description="CatPred retrained fold-5 inference on holdout examples.")
     parser.add_argument("--holdout-csv", required=True, help="Input CSV: pair_id, sequence, smiles, substrate_name.")
     parser.add_argument("--out-csv", required=True, help="Output predictions CSV.")
     parser.add_argument("--parameter", default="kcat", choices=["kcat", "km"])
+    parser.add_argument("--suite-dir", default=str(SUITE_DIR),
+                        help="Retrained suite containing fold checkpoints; CATRANGE_BENCHMARK_SUITE overrides the default.")
+    parser.add_argument("--repo-root", default=str(CATPRED_ROOT),
+                        help="External CatPred checkout; defaults to CATPRED_ROOT or a sibling CatPred directory.")
+    parser.add_argument("--checkpoint-dir", help="Checkpoint directory; default: <suite-dir>/catpred_retrained/fold5/checkpoints/fold_0/model_0.")
+    parser.add_argument("--cache-dir", help="ESM2 cache directory; default: <suite-dir>/catpred_esm2_cache.")
     parser.add_argument("--python-executable",
-                        default="/work/ssbio/aosinuga2/envs/catpred_model/bin/python",
-                        help="CatPred env python executable.")
+                        default=os.environ.get("PY_CATPRED", sys.executable),
+                        help="CatPred Python executable (default: PY_CATPRED or this active Python).")
     parser.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu"])
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    global SUITE_DIR, CATPRED_ROOT, CATPRED_CHECKPOINT, CATPRED_CACHE_DIR
+    args = parse_args()
+    SUITE_DIR = Path(args.suite_dir).expanduser().resolve()
+    CATPRED_ROOT = Path(args.repo_root).expanduser().resolve()
+    CATPRED_CHECKPOINT = Path(args.checkpoint_dir or SUITE_DIR / "catpred_retrained/fold5/checkpoints/fold_0/model_0").expanduser().resolve()
+    CATPRED_CACHE_DIR = Path(args.cache_dir or SUITE_DIR / "catpred_esm2_cache").expanduser().resolve()
+    # Preserve virtualenv executable symlinks; resolving them can switch to the
+    # base interpreter and lose the caller's CatPred dependencies.
+    python_executable = shutil.which(os.path.expanduser(args.python_executable))
+    if python_executable is None:
+        raise FileNotFoundError("CatPred Python executable was not found; set --python-executable or PY_CATPRED.")
+    if not CATPRED_ROOT.is_dir() or not CATPRED_CHECKPOINT.is_dir():
+        raise FileNotFoundError("External CatPred checkout/checkpoints are required; set --repo-root and --suite-dir or --checkpoint-dir.")
 
     import torch
     device_str = args.device
@@ -200,7 +223,7 @@ def main():
             checkpoint_dir=str(CATPRED_CHECKPOINT),
             use_gpu=(device.type == "cuda"),
             repo_root=str(CATPRED_ROOT),
-            python_executable=str(Path(args.python_executable).resolve()),
+            python_executable=python_executable,
             protein_records_file=str(records_json),
         )
         produced_output = Path(run_prediction_pipeline(request, results_dir=str(results_dir)))

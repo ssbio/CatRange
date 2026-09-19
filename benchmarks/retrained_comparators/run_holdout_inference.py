@@ -3,13 +3,12 @@
 Run the retrained fold-5 models (DLKcat, CatPred, UniKP, EITLEM) on the
 negative-holdout examples and write fresh prediction CSVs.
 
-Usage (from CatPred_DLKcat_Benchmark directory):
-    python run_holdout_inference.py --model dlkcat --holdout-csv <path> --out-csv <path>
-    python run_holdout_inference.py --model eitlem  --holdout-csv <path> --out-csv <path>
-    python run_holdout_inference.py --model unikp   --holdout-csv <path> --out-csv <path>
+Usage (with the selected comparator's environment activated):
+    python run_holdout_inference.py --model dlkcat --suite-dir <retrained-suite> --dlkcat-root <checkout> --holdout-csv <path> --out-csv <path>
+    python run_holdout_inference.py --model eitlem --suite-dir <retrained-suite> --eitlem-root <checkout> --holdout-csv <path> --out-csv <path>
+    python run_holdout_inference.py --model unikp --suite-dir <retrained-suite> --unikp-root <checkout> --holdout-csv <path> --out-csv <path>
 
-CatPred is called as a subprocess through its own environment (see the
-orchestration script run_holdout_all.sh or the notebook cell).
+For CatPred, use run_catpred_holdout.py in its own compatible environment.
 
 Input CSV columns expected: pair_id, sequence, smiles, substrate_name
 Output CSV columns:          pair_id, model_name, pred_value, pred_log10, pred_unit
@@ -31,10 +30,8 @@ import numpy as np
 import pandas as pd
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent
-SUITE_DIR = Path(
-    "/work/ssbio/aosinuga2/Python_work/EnzymeKinetics_Manuscript_Benchmark"
-    "/runs/manuscript_kcat_suite_retrained_same_split"
-).resolve()
+SUITE_DIR = Path(os.environ.get("CATRANGE_BENCHMARK_SUITE",
+    str(WORKSPACE_ROOT / "runs/manuscript_kcat_suite_retrained_same_split"))).expanduser().resolve()
 DLKCAT_RETRAINED = SUITE_DIR / "dlkcat_retrained" / "fold5"
 EITLEM_MODELS = SUITE_DIR / "eitlem_models"
 EITLEM_CACHE = SUITE_DIR / "eitlem_cache"
@@ -448,31 +445,39 @@ def parse_args():
     parser.add_argument("--holdout-csv", required=True,
                         help="Input CSV with pair_id, sequence, smiles, substrate_name.")
     parser.add_argument("--out-csv", required=True, help="Output predictions CSV.")
+    parser.add_argument("--suite-dir", default=str(SUITE_DIR),
+                        help="Retrained suite containing fold checkpoints; CATRANGE_BENCHMARK_SUITE overrides the default.")
     parser.add_argument("--parameter", default="kcat", choices=["kcat", "km"],
                         help="Target kinetic parameter.")
     parser.add_argument("--dlkcat-root",
-                        default="/work/ssbio/aosinuga2/Python_work/DLKcat",
+                        default=os.environ.get("DLKCAT_ROOT", str(WORKSPACE_ROOT.parents[2] / "DLKcat")),
                         help="DLKcat repository root.")
     parser.add_argument("--eitlem-root",
-                        default="/work/ssbio/aosinuga2/Python_work/EITLEM-Kinetics",
+                        default=os.environ.get("EITLEM_ROOT", str(WORKSPACE_ROOT.parents[2] / "EITLEM-Kinetics")),
                         help="EITLEM-Kinetics repository root.")
     parser.add_argument("--unikp-root",
-                        default="/work/ssbio/aosinuga2/Python_work/CatPred/external/UniKP",
+                        default=os.environ.get("UNIKP_ROOT", str(WORKSPACE_ROOT.parents[2] / "CatPred/external/UniKP")),
                         help="UniKP repository root.")
     return parser.parse_args()
 
 
 def main():
+    global SUITE_DIR, DLKCAT_RETRAINED, EITLEM_MODELS, EITLEM_CACHE, UNIKP_MODELS, UNIKP_CACHE, CATPRED_CHECKPOINT
     args = parse_args()
+    SUITE_DIR = Path(args.suite_dir).expanduser().resolve()
+    DLKCAT_RETRAINED = SUITE_DIR / "dlkcat_retrained/fold5"
+    EITLEM_MODELS, EITLEM_CACHE = SUITE_DIR / "eitlem_models", SUITE_DIR / "eitlem_cache"
+    UNIKP_MODELS, UNIKP_CACHE = SUITE_DIR / "unikp_models", SUITE_DIR / "unikp_cache"
+    CATPRED_CHECKPOINT = SUITE_DIR / "catpred_retrained/fold5/checkpoints/fold_0/model_0/model.pt"
     holdout_df = pd.read_csv(args.holdout_csv)
     print(f"Running {args.model} on {len(holdout_df)} inputs …")
 
     if args.model == "dlkcat":
-        pred_df = _run_dlkcat(holdout_df, args.parameter, Path(args.dlkcat_root))
+        pred_df = _run_dlkcat(holdout_df, args.parameter, Path(args.dlkcat_root).expanduser().resolve())
     elif args.model == "eitlem":
-        pred_df = _run_eitlem(holdout_df, args.parameter, Path(args.eitlem_root))
+        pred_df = _run_eitlem(holdout_df, args.parameter, Path(args.eitlem_root).expanduser().resolve())
     elif args.model == "unikp":
-        pred_df = _run_unikp(holdout_df, args.parameter, Path(args.unikp_root))
+        pred_df = _run_unikp(holdout_df, args.parameter, Path(args.unikp_root).expanduser().resolve())
     else:
         raise ValueError(f"Unknown model: {args.model}")
 

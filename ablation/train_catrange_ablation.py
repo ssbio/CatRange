@@ -19,9 +19,11 @@ from pathlib import Path
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run CatRange sequence/substrate ablation CV.")
-    parser.add_argument("--catrange-root", default="../CatRange", help="Path to CatRange root.")
-    parser.add_argument("--config", default="../CatRange/configs/kcat_esmc.yaml", help="CatRange YAML config.")
-    parser.add_argument("--output-dir", default="runs/kcat_esmc_ablation", help="Output directory.")
+    parser.add_argument("--catrange-root", default=Path(__file__).resolve().parents[1] / "catrange_model",
+                        help="Training package root (default: this checkout's catrange_model/).")
+    parser.add_argument("--config", help="CatRange YAML config (default: <catrange-root>/configs/kcat_esmc.yaml).")
+    parser.add_argument("--output-dir", default=Path(__file__).resolve().parent / "runs/kcat_esmc_ablation",
+                        help="Output directory (default: ablation/runs/kcat_esmc_ablation in this checkout).")
     parser.add_argument(
         "--feature-mode",
         action="append",
@@ -32,7 +34,10 @@ def parse_args():
     parser.add_argument("--max-folds", type=int, default=None, help="Optional quick-test fold limit.")
     parser.add_argument("--no-smote", action="store_true", help="Disable SMOTE.")
     parser.add_argument("--skip-hnm", action="store_true", help="Disable hard-negative mining.")
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.config is None:
+        args.config = Path(args.catrange_root).expanduser() / "configs/kcat_esmc.yaml"
+    return args
 
 
 def _feature_block(X, split_dim: int, mode: str):
@@ -99,9 +104,9 @@ def _write_summary(pd, fold_df, output_dir: Path):
 
 
 def run_one_mode(args, mode: str):
-    catrange_root = Path(args.catrange_root).resolve()
-    config_path = Path(args.config).resolve()
-    output_dir = Path(args.output_dir).resolve() / mode
+    catrange_root = Path(args.catrange_root).expanduser().resolve()
+    config_path = Path(args.config).expanduser().resolve()
+    output_dir = Path(args.output_dir).expanduser().resolve() / mode
     output_dir.mkdir(parents=True, exist_ok=True)
 
     sys.path.insert(0, str(catrange_root))
@@ -373,7 +378,7 @@ def main():
         summary_df["feature_mode"] = mode
         all_summary.append(summary_df)
 
-    output_dir = Path(args.output_dir).resolve()
+    output_dir = Path(args.output_dir).expanduser().resolve()
     if all_folds:
         import pandas as pd
 

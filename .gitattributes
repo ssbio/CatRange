@@ -1,0 +1,8 @@
+# Preserve audited data bytes on every platform, including CSV record endings.
+*.csv -text whitespace=cr-at-eol
+*.tsv -text whitespace=cr-at-eol
+*.xlsx binary
+*.xlsm binary
+*.pt binary
+*.png binary
+*.ipynb -text

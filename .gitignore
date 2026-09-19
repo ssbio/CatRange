@@ -52,3 +52,35 @@ build/
 dist/
 
 ignore/
+
+# Local Impeccable design-skill cache (session-local, not part of the repo).
+.impeccable/
+
+# Credentials and local runtime state must never be committed.
+.env
+.env.*
+*.env
+!.env.example
+!*.env.example
+secrets/
+.ssh/
+.kube/
+*.pem
+*.key
+id_rsa
+id_ed25519
+smtp-password
+hostinger-mail-api-key
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# Hosted application and operational records belong in the private repository.
+/webapp/
+/validation/
+/deploy/
+/deployment/
+/.dockerignore
+/.github/workflows/build-webapp-images.yml

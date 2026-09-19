@@ -1,0 +1,31 @@
+name: Check public research release
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check public tree and ancestry
+        run: python3 tools/check_public_release.py --git-ref HEAD
+      - name: Install lightweight validation dependencies
+        run: |
+          python3 -m venv /tmp/catrange-release-checks
+          /tmp/catrange-release-checks/bin/pip install openpyxl pytest
+      - name: Check tabular files against the release manifest
+        run: /tmp/catrange-release-checks/bin/python tools/audit_tabular_files.py --baseline data/RELEASE_TABULAR_MANIFEST.json
+      - name: Validate notebook structure and audit regression checks
+        run: |
+          /tmp/catrange-release-checks/bin/python tools/validate_catrange_colab_runtime.py CatRange_Inference_Interface.ipynb
+          /tmp/catrange-release-checks/bin/python -m pytest tools/tests -q

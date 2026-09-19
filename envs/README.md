@@ -1,79 +1,61 @@
-# CatRange Conda Environments
+# CatRange environments
 
-CatRange uses separate conda environments for the notebook/model workflow and
-for the two embedding backends that have historically conflicted when installed
-together.
+These files describe research environments for training, feature generation,
+notebook analysis, and plotting. The inference notebook manages its own isolated
+runtimes; the source CLI uses [inference/requirements.txt](../inference/requirements.txt).
+Do not combine these dependency sets without checking compatibility.
 
-## Recommended Environments
-
-| Environment | File | Purpose |
+| Environment | Definition | Purpose |
 | --- | --- | --- |
-| `catrange-notebooks-gpu` | `envs/catrange-notebooks-gpu.yml` | Main GPU environment for the three curated notebooks, CatRange model training/evaluation, manuscript figures, XGBoost, ESM-2/fair-esm, RDKit, and benchmark utilities. |
-| `catrange-esmc-gpu` | `envs/catrange-esmc-gpu.yml` | ESM-C protein embeddings only. Kept separate from ChemBERTa/Transformers to avoid dependency conflicts. |
-| `catrange-chemberta-gpu` | `envs/catrange-chemberta-gpu.yml` | ChemBERTa substrate embeddings only. |
-| `catrange-cpu-figures` | `envs/catrange-cpu-figures.yml` | CPU-only fallback for figure generation and lightweight table analysis. |
+| `catrange-notebooks-gpu` | [catrange-notebooks-gpu.yml](catrange-notebooks-gpu.yml) | Research notebooks, training/evaluation, XGBoost, ESM-2, and benchmark analysis |
+| `catrange-esmc-gpu` | [catrange-esmc-gpu.yml](catrange-esmc-gpu.yml) | ESM-C protein feature generation |
+| `catrange-chemberta-gpu` | [catrange-chemberta-gpu.yml](catrange-chemberta-gpu.yml) | ChemBERTa substrate feature generation |
+| `catrange-cpu-figures` | [catrange-cpu-figures.yml](catrange-cpu-figures.yml) | CPU plotting and table analysis |
 
-The GPU YAMLs use `pytorch-cuda=11.8`. This is compatible with modern NVIDIA
-drivers, including the tested local driver reporting CUDA 13.0 support, because
-NVIDIA drivers are backward-compatible with CUDA runtimes older than the driver.
+The research GPU definitions specify `pytorch-cuda=11.8`. ESM-C and ChemBERTa
+research environments are separated to avoid dependency conflicts; their saved
+features can then be used in the training environment.
 
-## Create Environments
+## Create and verify
 
-For more reproducible solves, set strict channel priority before creating the
-environments:
-
-```bash
-conda config --set channel_priority strict
-```
-
-Create all recommended GPU environments:
+Run from the repository root with conda available:
 
 ```bash
 bash scripts/env/create_conda_envs.sh all
-```
-
-Or create them one by one:
-
-```bash
+# Or select one environment:
 bash scripts/env/create_conda_envs.sh notebooks-gpu
 bash scripts/env/create_conda_envs.sh esmc-gpu
 bash scripts/env/create_conda_envs.sh chemberta-gpu
-```
-
-CPU-only figure environment:
-
-```bash
 bash scripts/env/create_conda_envs.sh figures-cpu
 ```
 
-## Register Jupyter Kernels
-
-After creating an environment, register it as a notebook kernel:
-
-```bash
-conda run -n catrange-notebooks-gpu python -m ipykernel install --user --name catrange-notebooks-gpu --display-name "CatRange notebooks GPU"
-conda run -n catrange-esmc-gpu python -m ipykernel install --user --name catrange-esmc-gpu --display-name "CatRange ESM-C GPU"
-conda run -n catrange-chemberta-gpu python -m ipykernel install --user --name catrange-chemberta-gpu --display-name "CatRange ChemBERTa GPU"
-```
-
-## Verify
+The helper creates missing environments and may update an existing environment
+of the same name. Inspect [create_conda_envs.sh](../scripts/env/create_conda_envs.sh)
+before using it with an environment that contains other work.
 
 ```bash
 bash scripts/env/verify_conda_envs.sh
 ```
 
-## Why Separate ESM-C and ChemBERTa?
+Register a Jupyter kernel when needed:
 
-The inference code needs ESM-C for protein embeddings and ChemBERTa via
-Hugging Face Transformers for SMILES embeddings. ESM-C comes from the
-EvolutionaryScale/Biohub ESM package, while ChemBERTa relies on a specific
-Transformers/tokenizers stack. Installing both into one environment has caused
-resolver and runtime conflicts before, so the reproducible setup intentionally
-splits them.
+```bash
+conda run -n catrange-notebooks-gpu python -m ipykernel install --user \
+  --name catrange-notebooks-gpu --display-name "CatRange notebooks GPU"
+```
 
-The intended workflow is:
+Use the corresponding environment name for ESM-C or ChemBERTa kernels.
+Environment creation does not obtain the external training tensors or comparator
+checkpoints; see the [data inventory](../data/catrange_metadata/DATA_DIRECTORY.md).
 
-1. Use `catrange-esmc-gpu` to generate protein sequence embeddings.
-2. Use `catrange-chemberta-gpu` to generate substrate SMILES embeddings.
-3. Use `catrange-notebooks-gpu` to train/evaluate CatRange, run XGBoost models,
-   and generate manuscript figures from saved embeddings/results.
+## Notebook runtime pins
+
+The notebook's separate runtime requirements are recorded in:
+
+- [colab-clean-py312.txt](colab-clean-py312.txt)
+- [colab-catrange-mechanistic-py312.txt](colab-catrange-mechanistic-py312.txt)
+- [colab-catrange-binary-py310.txt](colab-catrange-binary-py310.txt)
+
+The Python version, runtime pathway, and model files are part of the inference
+provenance. The legacy binary pathway is not interchangeable with the default
+mechanistic ESM-C pathway.
