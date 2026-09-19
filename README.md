@@ -8,7 +8,8 @@ and predicts kinetics for eligible rows. Skipped rows remain in the output.
 
 This repository contains the inference notebook, research code, curated data,
 and saved evaluation outputs. You can also use the
-[CatRange website](https://catrange.sahassbio.com).
+[SSBio Lab CatRange server](https://catrange.sahassbio.com) or the
+[CatRange server hosted by Chowdhury Lab](https://catrange.structf.studio/).
 
 ## Run in Google Colab
 
