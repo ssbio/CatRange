@@ -181,7 +181,4 @@ CatRange is a collaboration across three university labs: the
 ## License
 
 The CatRange authors' source code in this distribution is licensed under
-[Apache License 2.0](LICENSE). See [NOTICE](NOTICE) and the
-[retained MIT notice](LICENSES/MIT.txt) for previously MIT-declared package code.
-External software, model weights, and research datasets retain their own terms;
-the repository's code license does not relicense those assets.
+[Apache License 2.0](LICENSE). 
