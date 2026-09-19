@@ -15,6 +15,8 @@ setup(
     description="Mutation-aware kinetic range prediction for enzymes using CatRange",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    license="Apache-2.0",
+    license_files=["LICENSE", "NOTICE", "LICENSES/MIT.txt"],
     url="https://github.com/ssbio/CatRange",
     project_urls={
         "Bug Tracker": "https://github.com/ssbio/CatRange/issues",
@@ -27,7 +29,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",

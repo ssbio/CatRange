@@ -176,3 +176,12 @@ CatRange is a collaboration across three university labs: the
 [Chowdhury Lab](https://chowdhurylab.github.io/) (Iowa State University), the
 [SSBio Lab](https://sahassbio.com/) (University of Nebraska–Lincoln), and the
 [TKAI Lab](https://tkai-lab-mali.github.io/) (University of South Florida).
+
+
+## License
+
+The CatRange authors' source code in this distribution is licensed under
+[Apache License 2.0](LICENSE). See [NOTICE](NOTICE) and the
+[retained MIT notice](LICENSES/MIT.txt) for previously MIT-declared package code.
+External software, model weights, and research datasets retain their own terms;
+the repository's code license does not relicense those assets.

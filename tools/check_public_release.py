@@ -18,6 +18,7 @@ ROOTS = {
     ".github", ".gitignore", ".gitattributes", "README.md", "CatRange_Inference_Interface.ipynb",
     "ablation", "benchmarks", "catrange_model", "data", "envs", "inference",
     "results", "scripts", "tools",
+    "LICENSE", "NOTICE", "LICENSES",
 }
 BACKEND = ("webapp/", "deploy/", "deployment/", "secrets/", "operations/")
 TOKEN_RULES = {

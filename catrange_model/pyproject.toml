@@ -8,7 +8,7 @@ version = "1.2.0"
 description = "Mutation-aware kinetic range prediction for enzymes using CatRange"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
+license = {file = "LICENSE"}
 authors = [
     {name = "Abraham Osinuga", email = "oauife.abraham@gmail.com"}
 ]
@@ -25,7 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -73,6 +73,7 @@ realkcat-predict = "scripts.predict:main"
 
 [tool.setuptools]
 packages = ["src", "scripts"]
+license-files = ["LICENSE", "NOTICE", "LICENSES/MIT.txt"]
 
 [tool.black]
 line-length = 100

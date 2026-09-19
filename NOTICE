@@ -1,0 +1,19 @@
+CatRange research source distribution
+https://github.com/ssbio/CatRange
+
+This distribution makes the CatRange authors' source code available under the
+Apache License, Version 2.0. See LICENSE for the license text.
+
+Earlier catrange_model package metadata declared the MIT License. The MIT
+permission and disclaimer text is retained in LICENSES/MIT.txt for that
+previously MIT-declared code. This distribution preserves those earlier
+permissions and existing copyright and attribution notices; it does not assign
+new copyright ownership or dates to that code.
+
+Third-party software, externally downloaded model weights, and research data
+are not relicensed by this distribution. Their respective licenses, notices,
+and other applicable terms remain in effect. Dependencies include CLEAN,
+protein and substrate embedding models, and external benchmark implementations;
+consult the relevant upstream distributions for their terms.
+
+This NOTICE is informational and does not modify the Apache License.

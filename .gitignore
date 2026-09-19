@@ -84,3 +84,13 @@ hostinger-mail-api-key
 /deployment/
 /.dockerignore
 /.github/workflows/build-webapp-images.yml
+
+# Additional local state exclusions.
+.venv*/
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+*.db-journal
+/backups/
+/rendered/

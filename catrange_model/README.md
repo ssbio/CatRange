@@ -154,3 +154,12 @@ If you use **CatRange** in your work, please cite the following:
 }
 ```
 </details>
+
+
+## License
+
+The CatRange authors' source code in this package is licensed under
+[Apache License 2.0](LICENSE). See [NOTICE](NOTICE) and the
+[retained MIT notice](LICENSES/MIT.txt) for previously MIT-declared package code.
+External software, model weights, and research datasets retain their own terms;
+the package's code license does not relicense those assets.
