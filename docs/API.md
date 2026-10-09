@@ -13,8 +13,8 @@ permissions `600`, outside your project repository. Never embed a key in a
 public notebook, browser JavaScript, or a GitHub issue.
 
 Send `Authorization: Bearer <your-key>` on job requests. Documentation and
-readiness are public. A key can only access jobs submitted under its own client
-identity through this gateway. Existing website job IDs continue working on the
+readiness and aggregate activity counts are public. A key can only access jobs
+submitted under its own client identity through this gateway. Existing website job IDs continue working on the
 website; they are not automatically imported into the gateway.
 Treat Job IDs and emailed result links as private: the existing website still
 uses those links to grant access to retained results.
@@ -84,6 +84,7 @@ python examples/api/predict.py --input inputs.csv --output predictions.csv \
 | Method and path, relative to the API base | Purpose |
 | --- | --- |
 | `GET /ready` | Current backend readiness and available compute choices |
+| `GET /metrics` | Public successful-row totals for each parameter, including cached results |
 | `POST /jobs` | Submit inputs; returns a full `job_id` |
 | `GET /jobs/{job_id}` | Status, queue/compute timing, cache information, and result links |
 | `GET /jobs/{job_id}/results` | JSON dashboard results, limited to 10 rows / 1 MiB |
@@ -94,6 +95,12 @@ python examples/api/predict.py --input inputs.csv --output predictions.csv \
 Poll approximately every 10 seconds. A cache hit can finish immediately.
 Otherwise jobs pass through queueing and execution before `done` or a failure
 state. Use the returned links; do not assume backend-specific hostnames.
+
+Activity counters count each successful parameter result once per completed job;
+downloads do not increment them. Computed and cached results have separate
+subtotals. Tracking includes the results still retained at activation, so older
+deleted results are missing from this baseline. These are not lifetime totals.
+Collection can lag by about a minute; an outage is marked stale or unavailable.
 
 Retained result files are normally cleaned up seven days after completion.
 Availability within that period is best effort and is not guaranteed. Download
