@@ -21,9 +21,13 @@ ROOTS = {
     "LICENSE", "NOTICE", "LICENSES",
 }
 BACKEND = ("webapp/", "deploy/", "deployment/", "secrets/", "operations/")
+# Public client documentation is reviewed individually; this does not permit
+# arbitrary service code or operational material under docs/ or examples/.
+PUBLIC_API_FILES = {"docs/API.md", "examples/api/predict.py"}
 TOKEN_RULES = {
     "private-key": rb"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----",
     "github-token": rb"\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,})\b",
+    "research-api-key": rb"\bssbio_[A-Za-z0-9_-]{40,}\b",
     "huggingface-token": rb"\bhf_[A-Za-z0-9]{30,}\b",
     "aws-access-key": rb"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b",
     "slack-token": rb"\bxox[baprs]-[A-Za-z0-9-]{20,}\b",
@@ -47,7 +51,7 @@ def forbidden_path(name: str, history: bool = False) -> str | None:
         return "credential-path"
     if path.suffix.lower() in {".pem", ".key", ".sqlite", ".sqlite3", ".db"}:
         return "credential-or-runtime-file"
-    if not history and path.parts[0] not in ROOTS:
+    if not history and path.parts[0] not in ROOTS and name not in PUBLIC_API_FILES:
         return "unreviewed-top-level-path"
     return None
 
