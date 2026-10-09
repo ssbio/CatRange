@@ -10,6 +10,9 @@ Open [Get API key](https://api.sahassbio.com/access) and enter your email addres
 Your key is delivered to that inbox, never displayed in the request page. If
 your email is already registered, the same key is sent again; your jobs and
 usage allowance are preserved. Check your spam folder if it does not arrive.
+If the operator revokes your key, use the same form to request a replacement.
+The old key stops working; your account, jobs, and quota usage stay intact.
+Suspended accounts must be restored by the operator before requesting a key.
 Wait at least a minute before requesting again; up to three key emails per
 address per UTC day are permitted. Delivery is subject to service limits.
 
