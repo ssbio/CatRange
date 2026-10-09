@@ -1,23 +1,37 @@
 # CatRange API guide
 
 **Experimental service:** the stable API base is
-`https://api.sahassbio.com/catrange/v1`. Check [live readiness](https://api.sahassbio.com/catrange/v1/ready)
+`https://api.sahassbio.com/catrange/v1`. Check [Server Status](https://api.sahassbio.com/status)
 before submitting. [Interactive API reference](https://api.sahassbio.com/catrange/docs).
 
 ## Access
 
-Request an individual research API key from the service operator at
-`info@catrange.sahassbio.com`. Keys are provisioned by the operator; there is no
-automatic registration page. Keep your key private and store it in a file with
-permissions `600`, outside your project repository. Never embed a key in a
-public notebook, browser JavaScript, or a GitHub issue.
+Open [Get API key](https://api.sahassbio.com/access) and enter your email address.
+Your key is delivered to that inbox, never displayed in the request page. If
+your email is already registered, the same key is sent again; your jobs and
+usage allowance are preserved. Check your spam folder if it does not arrive.
+Wait at least a minute before requesting again; up to three key emails per
+address per UTC day are permitted. Delivery is subject to service limits.
 
-Send `Authorization: Bearer <your-key>` on job requests. Documentation and
-readiness and aggregate activity counts are public. A key can only access jobs
-submitted under its own client identity through this gateway. Existing website job IDs continue working on the
-website; they are not automatically imported into the gateway.
+Keep your key private and store it in a file with permissions `600`, outside
+your project repository. Never embed it in a public notebook, browser
+JavaScript, or a GitHub issue. Keys do not currently expire automatically.
+For replacement of an exposed key, changed quotas, or an older key not linked
+to your email, contact `info@catrange.sahassbio.com`.
+
+Send `Authorization: Bearer <your-key>` on job requests. Documentation,
+readiness information, and aggregate activity counts are public. A key can only access jobs
+submitted under its own client identity through this gateway. Existing website
+job IDs continue working on the website; they are not automatically imported
+into the gateway.
 Treat Job IDs and emailed result links as private: the existing website still
 uses those links to grant access to retained results.
+
+The [Server Status page](https://api.sahassbio.com/status) and
+[interactive API reference](https://api.sahassbio.com/catrange/docs) are visual
+interfaces. `/catrange/v1/ready` and `/openapi.json` return machine-readable JSON
+for software clients. The [schema page](https://api.sahassbio.com/schema) explains
+the format and offers a JSON download.
 
 ## Submit a CSV
 
