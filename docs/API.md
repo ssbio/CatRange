@@ -158,6 +158,3 @@ replace the range prediction. CLEAN screening remains part of the pipeline.
 See [CatRange's README and citation](https://github.com/ssbio/CatRange#readme)
 for the current paper and scientific source. The shared gateway is operated by
 SSBio Lab. Copyright © 2026 SahaSSBio.
-
-R-DMFA is planned as a separate adapter under `/r-dmfa/v1`; it is not enabled by
-this CatRange release.
