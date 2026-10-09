@@ -16,6 +16,8 @@ If you are new to the project, an undergraduate researcher, or simply want to te
 **Option 1: Web Servers**
 Run predictions directly in your browser using either the [SSBio Lab CatRange server](https://catrange.sahassbio.com) or the [Chowdhury Lab server](https://catrange.structf.studio/).
 
+**Programmatic access:** Use the [SSBio Research API](https://api.sahassbio.com/docs) to submit predictions from your own scripts. See the [CatRange API guide](docs/API.md), [interactive reference](https://api.sahassbio.com/catrange/docs), and [Python example](examples/api/predict.py) for API keys, CSV uploads, progress tracking, caching, and downloads. This is an experimental shared research service.
+
 **Option 2: Google Colab Notebook**
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssbio/CatRange/blob/main/CatRange_Inference_Interface.ipynb)
 1. Open the notebook and sign in to your Google account.
